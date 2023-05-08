@@ -23,6 +23,20 @@ namespace Toletus.LiteNet2.Command
 
         private static byte[] GetPayload(ushort command, byte[] parameter)
         {
+            /* Payload (20 bytes)
+             *
+             * /- Prefix (1 byte) (0x53)
+             * |
+             * |/- Command (2 bytes)
+             * ||
+             * || /- Parameters (16 bytes)
+             * || |                         
+             * || |               /- Suffix (1 byte) (0xc3)
+             * || |               |
+             * 01234567890123456789
+             * 
+            */
+
             if (parameter == null) parameter = new byte[16];
 
             var payload = new byte[20];

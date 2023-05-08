@@ -1,9 +1,11 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+//using FluentScheduler;
 using Toletus.Extensions;
 using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
@@ -12,7 +14,7 @@ namespace Toletus.LiteNet2.Base
 {
     public class LiteNet2BoardBase
     {
-        public static Action<string>? Log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public const int Port = 7878;
 
@@ -50,6 +52,8 @@ namespace Toletus.LiteNet2.Base
                 TcpClient = new TcpClient();
                 TcpClient.Connect(Ip, Port);
 
+                //JobManager.AddJob(() => CheckConnection(), s => s.ToRunEvery(30).Seconds());
+
                 _ = Response();
 
                 OnConnectionStatusChanged?.Invoke(this, ConnectionStatus.Connected);
@@ -66,6 +70,12 @@ namespace Toletus.LiteNet2.Base
 
         private void CheckConnection()
         {
+            //if (IsConnected2()) return;
+
+            //OnStatus?.Invoke("Reconnecting");
+
+            //TryReconnect();
+
             Send(Commands.GetId);
         }
 
@@ -77,7 +87,7 @@ namespace Toletus.LiteNet2.Base
 
         private async Task Response()
         {
-            Log?.Invoke("Response start");
+            Logger.Debug("Response start");
 
             var buffer = new byte[1024];
             try
@@ -105,23 +115,25 @@ namespace Toletus.LiteNet2.Base
             }
             catch (ObjectDisposedException e)
             {
-                Log?.Invoke($"Response ObjectDisposedException {e.ToLogString(Environment.StackTrace)}");
+                Logger.Debug($"Response ObjectDisposedException {e.ToLogString(Environment.StackTrace)}");
+                //pare de receber dados quando a conexão for fechada
             }
             catch (System.IO.IOException e)
             {
-                Log?.Invoke($"Connection closed. Receive response finised. (IOException)");
+                Logger.Debug($"Connection closed. Receive response finised. (IOException)");
+                //Logger.Debug($"Response IOException {e.ToLogString(Environment.StackTrace)}");
                 TcpClient.Close();
                 throw;
             }
             catch (Exception e)
             {
-                Log?.Invoke($"Response Exception {e.ToLogString(Environment.StackTrace)}");
+                Logger.Debug($"Response Exception {e.ToLogString(Environment.StackTrace)}");
                 Close();
                 throw;
             }
             finally
             {
-                Log?.Invoke("Response finally");
+                Logger.Debug("Response finally");
             }
         }
 
@@ -233,52 +245,56 @@ namespace Toletus.LiteNet2.Base
                 throw;
             }
         }
-        //
-        // public bool IsConnected2()
-        // {
-        //     if (TcpClient.Client.Poll(0, SelectMode.SelectRead))
-        //     {
-        //         byte[] buff = new byte[1];
-        //         if (TcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
-        //         {
-        //             return false;
-        //         }
-        //     }
-        //
-        //     return true;
-        // }
-        //
-        // bool IsConnected()
-        // {
-        //     if (TcpClient.Client.Connected)
-        //     {
-        //         if ((TcpClient.Client.Poll(0, SelectMode.SelectWrite)) && (!TcpClient.Client.Poll(0, SelectMode.SelectError)))
-        //         {
-        //             byte[] buffer = new byte[1];
-        //             if (TcpClient.Client.Receive(buffer, SocketFlags.Peek) == 0)
-        //             {
-        //                 return false;
-        //             }
-        //             else
-        //             {
-        //                 return true;
-        //             }
-        //         }
-        //         else
-        //         {
-        //             return false;
-        //         }
-        //     }
-        //     else
-        //     {
-        //         return false;
-        //     }
-        // }
+
+        public bool IsConnected2()
+        {
+            if (TcpClient.Client.Poll(0, SelectMode.SelectRead))
+            {
+                byte[] buff = new byte[1];
+                if (TcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
+                {
+                    // Client disconnected
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool IsConnected()
+        {
+            if (TcpClient.Client.Connected)
+            {
+                if ((TcpClient.Client.Poll(0, SelectMode.SelectWrite)) && (!TcpClient.Client.Poll(0, SelectMode.SelectError)))
+                {
+                    byte[] buffer = new byte[1];
+                    if (TcpClient.Client.Receive(buffer, SocketFlags.Peek) == 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         private bool _reconnecting;
 
         private void TryReconnect()
         {
+            // talvez implementar socket pool, para ver se tem um status de conexão mais preciso.
+            //https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.poll?redirectedfrom=MSDN&view=net-7.0#System_Net_Sockets_Socket_Poll_System_Int32_System_Net_Sockets_SelectMode_
+
             Task.Run(async () =>
             {
                 try

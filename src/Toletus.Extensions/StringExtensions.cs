@@ -20,7 +20,6 @@ namespace Toletus.Extensions
         {
             return whitespaceRegex.Replace(input, string.Empty);
         }
-
         public static string RemoveDiacritics(this string input)
         {
             var tempBytes = System.Text.Encoding.GetEncoding("ISO-8859-8").GetBytes(input);

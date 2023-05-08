@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Toletus.LiteNet2.Base.Utils
+namespace Toletus.LiteNet2.Base.Util
 {
     public class LiteNetUtil
     {
