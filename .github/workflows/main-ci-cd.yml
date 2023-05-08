@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '7.0.x'
-          source-url: https://nuget.pkg.github.com/actuar/index.json
+          source-url: https://nuget.pkg.github.com/toletus/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
@@ -38,4 +38,4 @@ jobs:
           dotnet pack "src/Toletus.LiteNet2.Base/Toletus.LiteNet2.Base.csproj" --configuration Release /p:PackageVersion=${{ env.version }}  #-beta
 
       - name: Publish Toletus.LiteNet2.Base
-        run: dotnet nuget push "src/Toletus.LiteNet2.Base/bin/Release/*.nupkg" -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/actuar/index.json --skip-duplicate
+        run: dotnet nuget push "src/Toletus.LiteNet2.Base/bin/Release/*.nupkg" -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/toletus/index.json --skip-duplicate
