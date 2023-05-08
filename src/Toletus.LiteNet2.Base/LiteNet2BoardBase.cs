@@ -233,47 +233,47 @@ namespace Toletus.LiteNet2.Base
                 throw;
             }
         }
-
-        public bool IsConnected2()
-        {
-            if (TcpClient.Client.Poll(0, SelectMode.SelectRead))
-            {
-                byte[] buff = new byte[1];
-                if (TcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        bool IsConnected()
-        {
-            if (TcpClient.Client.Connected)
-            {
-                if ((TcpClient.Client.Poll(0, SelectMode.SelectWrite)) && (!TcpClient.Client.Poll(0, SelectMode.SelectError)))
-                {
-                    byte[] buffer = new byte[1];
-                    if (TcpClient.Client.Receive(buffer, SocketFlags.Peek) == 0)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
+        //
+        // public bool IsConnected2()
+        // {
+        //     if (TcpClient.Client.Poll(0, SelectMode.SelectRead))
+        //     {
+        //         byte[] buff = new byte[1];
+        //         if (TcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
+        //         {
+        //             return false;
+        //         }
+        //     }
+        //
+        //     return true;
+        // }
+        //
+        // bool IsConnected()
+        // {
+        //     if (TcpClient.Client.Connected)
+        //     {
+        //         if ((TcpClient.Client.Poll(0, SelectMode.SelectWrite)) && (!TcpClient.Client.Poll(0, SelectMode.SelectError)))
+        //         {
+        //             byte[] buffer = new byte[1];
+        //             if (TcpClient.Client.Receive(buffer, SocketFlags.Peek) == 0)
+        //             {
+        //                 return false;
+        //             }
+        //             else
+        //             {
+        //                 return true;
+        //             }
+        //         }
+        //         else
+        //         {
+        //             return false;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         return false;
+        //     }
+        // }
 
         private bool _reconnecting;
 
