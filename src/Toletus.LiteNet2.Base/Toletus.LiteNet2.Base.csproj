@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<VersionPrefix>1.0.0</VersionPrefix>
+		<AssemblyName>Toletus.LiteNet2.Base</AssemblyName>
+		<PackageId>Toletus.LiteNet2.Base</PackageId>
+		<Product>Toletus.LiteNet2.Base</Product>
+		<Description>Base integration with Toletus LiteNet2 Board.</Description>
+		<PackageReleaseNotes>
+			Use this packger with your C# application to send and receive commands to/from Toletus LiteNet2 Board
+		</PackageReleaseNotes>
+		<!--		<SignAssembly>True</SignAssembly>-->
+		<!--		<DelaySign>False</DelaySign>-->
+<!--		<DocumentationFile Condition="'$(Configuration)'=='Release'">bin\$(Configuration)\$(TargetFramework)\FluentValidation.AspNetCore.xml</DocumentationFile>-->
+		<DebugType>embedded</DebugType>
+		<!--		<PackageReadmeFile>README.md</PackageReadmeFile>-->
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<PackageProjectUrl>https://github.com/toletus</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/toletus/Toletus.LiteNet2.Base</RepositoryUrl>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+		<NeutralLanguage>en</NeutralLanguage>
+<!--		<AssemblyOriginatorKeyFile>$(MSBuildProjectDirectory)/../FluentValidation-Release.snk</AssemblyOriginatorKeyFile>-->
+<!--		<PackageOutputPath>$(MSBuildProjectDirectory)/../../.build/packages</PackageOutputPath>-->
+		<EnablePackageValidation>true</EnablePackageValidation>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild Condition="'$(Configuration)'=='Release'">true</ContinuousIntegrationBuild>
+<!--		<PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>-->
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Toletus.LiteNet2.Command\Toletus.LiteNet2.Command.csproj" />
+	</ItemGroup>
+
+</Project>
