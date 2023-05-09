@@ -14,55 +14,55 @@ public partial class LiteNet2Board
     {
         Log?.Invoke($"LiteNet < {boardResponse}");
 
-        switch (boardResponse.Command)
+        switch (boardResponse.LiteNet2Command)
         {
-            case Commands.GetFirmwareVersion:
+            case LiteNet2Commands.GetFirmwareVersion:
                 ProcessFirmwareVersionResponse(boardResponse);
                 break;
-            case Commands.GetMac:
+            case LiteNet2Commands.GetMac:
                 ProcessMacResponse(boardResponse);
                 break;
-            case Commands.Gyre:
-            case Commands.GyreTimeout:
+            case LiteNet2Commands.Gyre:
+            case LiteNet2Commands.GyreTimeout:
                 ProcessGyreResponse(boardResponse);
                 break;
-            case Commands.GetIpMode:
+            case LiteNet2Commands.GetIpMode:
                 ProcessIpModeResponse(boardResponse);
                 break;
-            case Commands.GetBuzzerMute:
+            case LiteNet2Commands.GetBuzzerMute:
                 ProcessBuzzerMute(boardResponse);
                 break;
-            case Commands.GetFlowControl:
+            case LiteNet2Commands.GetFlowControl:
                 ProcessFlowControl(boardResponse);
                 break;
-            case Commands.GetFlowControlExtended:
+            case LiteNet2Commands.GetFlowControlExtended:
                 ProcessFlowControlExtended(boardResponse);
                 break;
-            case Commands.GetEntryClockwise:
+            case LiteNet2Commands.GetEntryClockwise:
                 ProcessEntryClockwise(boardResponse);
                 break;
-            case Commands.GetId:
+            case LiteNet2Commands.GetId:
                 ProcessGetId(boardResponse);
                 break;
-            case Commands.GetMessageLine1:
+            case LiteNet2Commands.GetMessageLine1:
                 ProcessMessageLine1(boardResponse);
                 break;
-            case Commands.GetMessageLine2:
+            case LiteNet2Commands.GetMessageLine2:
                 ProcessMessageLine2(boardResponse);
                 break;
-            case Commands.GetSerialNumber:
+            case LiteNet2Commands.GetSerialNumber:
                 ProcessSerialNumber(boardResponse);
                 break;
-            case Commands.GetFingerprintIdentificationMode:
+            case LiteNet2Commands.GetFingerprintIdentificationMode:
                 ProcessFingerprintIdentificationMode(boardResponse);
                 break;
-            case Commands.GetShowCounters:
+            case LiteNet2Commands.GetShowCounters:
                 ProcessShowCounters(boardResponse);
                 break;
-            case Commands.GetReleaseDuration:
+            case LiteNet2Commands.GetReleaseDuration:
                 ProcessReleaseDuration(boardResponse);
                 break;
-            case Commands.GetMenuPassword:
+            case LiteNet2Commands.GetMenuPassword:
                 ProcessMenuPassword(boardResponse);
                 break;
         }
@@ -150,14 +150,14 @@ public partial class LiteNet2Board
 
     private void ProcessGyreResponse(BoardResponseCommand boardResponse)
     {
-        if (boardResponse.Command == Commands.Gyre)
+        if (boardResponse.LiteNet2Command == LiteNet2Commands.Gyre)
         {
             if (boardResponse.RawData[0] == 1)
                 OnGyre?.Invoke(this, Direction.Entry);
             else if (boardResponse.RawData[0] == 2)
                 OnGyre?.Invoke(this, Direction.Exit);
         }
-        else if (boardResponse.Command == Commands.GyreTimeout)
+        else if (boardResponse.LiteNet2Command == LiteNet2Commands.GyreTimeout)
             OnGyre?.Invoke(this, Direction.None);
     }
 

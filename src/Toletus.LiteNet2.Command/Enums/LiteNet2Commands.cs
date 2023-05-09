@@ -1,6 +1,6 @@
 ﻿namespace Toletus.LiteNet2.Command.Enums;
 
-public enum Commands
+public enum LiteNet2Commands
 {
     ReleaseEntry = 0x0001,
     ReleaseExit = 0x0002,

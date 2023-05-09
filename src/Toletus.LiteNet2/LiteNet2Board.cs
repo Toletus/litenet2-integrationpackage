@@ -3,9 +3,8 @@ using System.Net;
 using System.Threading;
 using Toletus.LiteNet2.Base;
 using Toletus.LiteNet2.Command;
+using Toletus.LiteNet2.Command.Enums;
 using Toletus.LiteNet2.Enums;
-using Commands = Toletus.LiteNet2.Command.Enums.Commands;
-using ConnectionStatus = Toletus.LiteNet2.Command.Enums.ConnectionStatus;
 
 namespace Toletus.LiteNet2;
 
@@ -35,19 +34,19 @@ public partial class LiteNet2Board : LiteNet2BoardBase
         OnSend?.Invoke(this, boardSend);
     }
 
-    private void LiteNetOnConnectionStatusChanged(LiteNet2BoardBase liteNet2BoardBase, ConnectionStatus connectionStatus)
+    private void LiteNetOnConnectionStatusChanged(LiteNet2BoardBase liteNet2BoardBase, BoardConnectionStatus boardConnectionStatus)
     {
-        if (connectionStatus == ConnectionStatus.Connected)
+        if (boardConnectionStatus == BoardConnectionStatus.Connected)
         {
             OnReady?.Invoke("LiteNet2 Ok");
-            Log?.Invoke($"{liteNet2BoardBase} {connectionStatus}");
-            Send(Commands.GetFlowControlExtended);
+            Log?.Invoke($"{liteNet2BoardBase} {boardConnectionStatus}");
+            Send(LiteNet2Commands.GetFlowControlExtended);
 
             if (FingerprintReader == null)
                 CreateFingerprintReaderAndTest();
         }
         else
-            EventStatus(connectionStatus.ToString());
+            EventStatus(boardConnectionStatus.ToString());
     }
 
     public new void Close()

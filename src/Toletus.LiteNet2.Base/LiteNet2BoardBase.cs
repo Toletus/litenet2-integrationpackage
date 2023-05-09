@@ -25,7 +25,7 @@ public class LiteNet2BoardBase
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
     public event Action<BoardResponseCommand>? OnResponse;
     public event IdentificationHandler? OnIdentification;
-    public event Action<LiteNet2BoardBase, ConnectionStatus>? OnConnectionStatusChanged;
+    public event Action<LiteNet2BoardBase, BoardConnectionStatus>? OnConnectionStatusChanged;
     public event Action<string>? OnStatus;
     public event Action<LiteNet2BoardBase, BoardSendCommand>? OnSend;
 
@@ -50,7 +50,7 @@ public class LiteNet2BoardBase
 
             _ = Response();
 
-            OnConnectionStatusChanged?.Invoke(this, ConnectionStatus.Connected);
+            OnConnectionStatusChanged?.Invoke(this, BoardConnectionStatus.Connected);
         }
         catch (SocketException)
         {
@@ -64,13 +64,13 @@ public class LiteNet2BoardBase
 
     private void CheckConnection()
     {
-        Send(Commands.GetId);
+        Send(LiteNet2Commands.GetId);
     }
 
     public void Close()
     {
         _tcpClient?.Close();
-        OnConnectionStatusChanged?.Invoke(this, ConnectionStatus.Closed);
+        OnConnectionStatusChanged?.Invoke(this, BoardConnectionStatus.Closed);
     }
 
     private async Task Response()
@@ -127,13 +127,13 @@ public class LiteNet2BoardBase
     {
         var response = new BoardResponseCommand(resp);
 
-        switch (response.Command)
+        switch (response.LiteNet2Command)
         {
-            case Commands.NegativeIdentificationByFingerprintReader:
-            case Commands.PositiveIdentificationByFingerprintReader:
-            case Commands.IdentificationByBarCode:
-            case Commands.IdentificationByRfId:
-            case Commands.IdentificationByKeyboard:
+            case LiteNet2Commands.NegativeIdentificationByFingerprintReader:
+            case LiteNet2Commands.PositiveIdentificationByFingerprintReader:
+            case LiteNet2Commands.IdentificationByBarCode:
+            case LiteNet2Commands.IdentificationByRfId:
+            case LiteNet2Commands.IdentificationByKeyboard:
                 response.Identification = ProcessIdentificationResponse(response);
                 break;
         }
@@ -145,19 +145,19 @@ public class LiteNet2BoardBase
     {
         Identification? identification = null;
 
-        switch (boardResponse.Command)
+        switch (boardResponse.LiteNet2Command)
         {
-            case Commands.IdentificationByKeyboard:
+            case LiteNet2Commands.IdentificationByKeyboard:
                 identification = new Identification(IdentificationDevice.Keyboard, int.Parse(boardResponse.DataString));
                 break;
-            case Commands.IdentificationByBarCode:
+            case LiteNet2Commands.IdentificationByBarCode:
                 identification = new Identification(IdentificationDevice.BarCode, int.Parse(boardResponse.DataString));
                 break;
-            case Commands.IdentificationByRfId:
+            case LiteNet2Commands.IdentificationByRfId:
                 identification = new Identification(IdentificationDevice.Rfid, int.Parse(boardResponse.DataString));
                 break;
-            case Commands.PositiveIdentificationByFingerprintReader:
-            case Commands.NegativeIdentificationByFingerprintReader:
+            case LiteNet2Commands.PositiveIdentificationByFingerprintReader:
+            case LiteNet2Commands.NegativeIdentificationByFingerprintReader:
                 identification = new Identification(IdentificationDevice.EmbeddedFingerprint, int.Parse(boardResponse.Data.ToString()));
                 HasFingerprintReader = true;
                 break;
@@ -168,26 +168,26 @@ public class LiteNet2BoardBase
         return identification!;
     }
 
-    public void Send(Commands command, int parameter)
+    public void Send(LiteNet2Commands liteNet2Command, int parameter)
     {
-        Send(command, BitConverter.GetBytes(parameter));
+        Send(liteNet2Command, BitConverter.GetBytes(parameter));
     }
 
-    public void Send(Commands command, byte parameter)
+    public void Send(LiteNet2Commands liteNet2Command, byte parameter)
     {
-        Send(command, new[] { parameter });
+        Send(liteNet2Command, new[] { parameter });
     }
 
-    public void Send(Commands command, string parameter)
+    public void Send(LiteNet2Commands liteNet2Command, string parameter)
     {
         parameter = parameter.Truncate(16).PadRight(16, '\0');
 
-        Send(command, Encoding.ASCII.GetBytes(parameter));
+        Send(liteNet2Command, Encoding.ASCII.GetBytes(parameter));
     }
 
-    public void Send(Commands command, byte[]? parameter = null)
+    public void Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null)
     {
-        var send = new BoardSendCommand(command, parameter);
+        var send = new BoardSendCommand(liteNet2Command, parameter);
 
         Send(send);
     }

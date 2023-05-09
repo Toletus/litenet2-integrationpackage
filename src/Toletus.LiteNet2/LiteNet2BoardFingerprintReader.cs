@@ -22,13 +22,13 @@ public partial class LiteNet2Board
         return FingerprintReader;
     }
 
-    private void FingerprintReaderConnectionStateChanged(ConnectionStatus connectionStatus)
+    private void FingerprintReaderConnectionStateChanged(ReaderConnectionStatus connectionStatus)
     {
-        if (connectionStatus == ConnectionStatus.Closed) return;
+        if (connectionStatus == ReaderConnectionStatus.Closed) return;
 
         try
         {
-            if (!HasFingerprintReader && connectionStatus == ConnectionStatus.Connected)
+            if (!HasFingerprintReader && connectionStatus == ReaderConnectionStatus.Connected)
                 HasFingerprintReader = true;
 
             //var ret = FingerprintReader.Sync.TestConnection();

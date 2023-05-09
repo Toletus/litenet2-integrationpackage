@@ -9,17 +9,17 @@ public class BoardSendCommand
     private const byte Prefix = 0x53;
     private const byte Suffix = 0xc3;
 
-    public BoardSendCommand(Commands command, byte[]? parameter = null) : this((ushort)command, parameter)
+    public BoardSendCommand(LiteNet2Commands liteNet2Command, byte[]? parameter = null) : this((ushort)liteNet2Command, parameter)
     {
     }
 
     public BoardSendCommand(ushort comando, byte[]? parameter = null)
     {
-        Command = (Commands)comando;
+        LiteNet2Command = (LiteNet2Commands)comando;
         Payload = GetPayload(comando, parameter);
     }
 
-    public Commands Command { get; set; }
+    public LiteNet2Commands LiteNet2Command { get; set; }
     public byte[] Payload { get; set; }
 
     private static byte[] GetPayload(ushort command, byte[]? parameter)
@@ -37,6 +37,6 @@ public class BoardSendCommand
 
     public override string ToString()
     {
-        return $"{Payload.ToHexString(" ")} {Command}";
+        return $"{Payload.ToHexString(" ")} {LiteNet2Command}";
     }
 }

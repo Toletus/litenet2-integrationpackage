@@ -10,138 +10,138 @@ public partial class LiteNet2Board
 {
     public void ReleaseEntry(string message)
     {
-        Send(Commands.ReleaseEntry, message.RemoveDiacritics());
+        Send(LiteNet2Commands.ReleaseEntry, message.RemoveDiacritics());
     }
 
     public void ReleaseExit(string message)
     {
-        Send(Commands.ReleaseExit, message.RemoveDiacritics());
+        Send(LiteNet2Commands.ReleaseExit, message.RemoveDiacritics());
     }
 
     public void SetEntryClockwise(bool entryClockwise)
     {
-        Send(Commands.SetEntryClockwise, entryClockwise ? 0x01 : 0x00);
+        Send(LiteNet2Commands.SetEntryClockwise, entryClockwise ? 0x01 : 0x00);
     }
 
     public void SetBuzzerMute(bool on)
     {
-        Send(Commands.SetBuzzerMute, on ? 1 : 0);
+        Send(LiteNet2Commands.SetBuzzerMute, on ? 1 : 0);
     }
 
     public void SetFlowControl(ControlledFlow controlledFlow)
     {
-        Send(Commands.SetFlowControl, (int)controlledFlow);
+        Send(LiteNet2Commands.SetFlowControl, (int)controlledFlow);
     }
 
     public void SetFlowControlExtended(ControlledFlowExtended controlledFlowExtended)
     {
-        Send(Commands.SetFlowControlExtended, (int)controlledFlowExtended);
+        Send(LiteNet2Commands.SetFlowControlExtended, (int)controlledFlowExtended);
     }
 
     public void GetMac()
     {
-        Send(Commands.GetMac);
+        Send(LiteNet2Commands.GetMac);
     }
 
     public void SetId(int id)
     {
         Id = id;
-        Send(Commands.SetId, id);
+        Send(LiteNet2Commands.SetId, id);
     }
 
     public void SetFingerprintIdentificationMode(FingerprintIdentificationMode fingerprintIdentificationMode)
     {
-        Send(Commands.SetFingerprintIdentificationMode, (int)fingerprintIdentificationMode);
+        Send(LiteNet2Commands.SetFingerprintIdentificationMode, (int)fingerprintIdentificationMode);
     }
 
     public void GetEntryClockwise()
     {
-        Send(Commands.GetEntryClockwise);
+        Send(LiteNet2Commands.GetEntryClockwise);
     }
 
     public void GetFlowControl()
     {
-        Send(Commands.GetFlowControl);
+        Send(LiteNet2Commands.GetFlowControl);
     }
 
     public void GetFlowControlExtended()
     {
-        Send(Commands.GetFlowControlExtended);
+        Send(LiteNet2Commands.GetFlowControlExtended);
     }
 
     public void GetId()
     {
-        Send(Commands.GetId);
+        Send(LiteNet2Commands.GetId);
     }
 
     public void GetMessageLine1()
     {
-        Send(Commands.GetMessageLine1);
+        Send(LiteNet2Commands.GetMessageLine1);
     }
 
     public void GetMessageLine2()
     {
-        Send(Commands.GetMessageLine2);
+        Send(LiteNet2Commands.GetMessageLine2);
     }
 
     public void GetBuzzerMute()
     {
-        Send(Commands.GetBuzzerMute);
+        Send(LiteNet2Commands.GetBuzzerMute);
     }
 
     public void GetReleaseDuration()
     {
-        Send(Commands.GetReleaseDuration);
+        Send(LiteNet2Commands.GetReleaseDuration);
     }
 
     public void GetMenuPassword()
     {
-        Send(Commands.GetMenuPassword);
+        Send(LiteNet2Commands.GetMenuPassword);
     }
 
     public void GetFirmwareVersion()
     {
-        Send(Commands.GetFirmwareVersion);
+        Send(LiteNet2Commands.GetFirmwareVersion);
     }
 
     public void GetSerialNumber()
     {
-        Send(Commands.GetSerialNumber);
+        Send(LiteNet2Commands.GetSerialNumber);
     }
 
     public void GetFingerprintIdentificationMode()
     {
-        Send(Commands.GetFingerprintIdentificationMode);
+        Send(LiteNet2Commands.GetFingerprintIdentificationMode);
     }
 
     public void GetIpMode()
     {
-        Send(Commands.GetIpMode);
+        Send(LiteNet2Commands.GetIpMode);
     }
 
     public void SetMessageLine1(string msg1)
     {
-        Send(Commands.SetMessageLine1, msg1.RemoveDiacritics());
+        Send(LiteNet2Commands.SetMessageLine1, msg1.RemoveDiacritics());
     }
 
     public void SetMessageLine2(string msg2)
     {
-        Send(Commands.SetMessageLine2, msg2.RemoveDiacritics());
+        Send(LiteNet2Commands.SetMessageLine2, msg2.RemoveDiacritics());
     }
 
     public void SetReleaseDuration(int releaseDuration)
     {
-        Send(Commands.SetReleaseDuration, releaseDuration);
+        Send(LiteNet2Commands.SetReleaseDuration, releaseDuration);
     }
 
     public void ResetCounters()
     {
-        Send(Commands.ResetCounters);
+        Send(LiteNet2Commands.ResetCounters);
     }
 
     public void Reset()
     {
-        Send(Commands.Reset);
+        Send(LiteNet2Commands.Reset);
     }
 
     public void SetIp(bool dhcp, IPAddress ip, IPAddress subnetMask)
@@ -161,16 +161,16 @@ public partial class LiteNet2Board
 
     public void SetMenuPassword(byte[] password)
     {
-        Send(Commands.SetMenuPassword, password);
+        Send(LiteNet2Commands.SetMenuPassword, password);
     }
 
     public void SetShowCounters(bool showCounters)
     {
-        Send(Commands.SetShowCounters, showCounters ? 1 : 0);
+        Send(LiteNet2Commands.SetShowCounters, showCounters ? 1 : 0);
     }
 
     public void GetShowCounters()
     {
-        Send(Commands.GetShowCounters);
+        Send(LiteNet2Commands.GetShowCounters);
     }
 }
