@@ -12,8 +12,8 @@ namespace Toletus.LiteNet2;
 public partial class LiteNet2Board : LiteNet2BoardBase
 {
     public delegate void GyreHandler(LiteNet2Board liteNet2Board, Direction direction);
-    public delegate void ResponseHandler(LiteNet2Board liteNet2Board, ResponseCommand responseCommand);
-    public delegate void SendHandler(LiteNet2Board liteNet2Board, SendCommand sendCommand);
+    public delegate void ResponseHandler(LiteNet2Board liteNet2Board, BoardResponseCommand boardResponseCommand);
+    public delegate void SendHandler(LiteNet2Board liteNet2Board, BoardSendCommand boardSendCommand);
 
     public event Action<bool>? OnFingerprintReaderConnected;
     public event Action<string>? OnReady;
@@ -29,10 +29,10 @@ public partial class LiteNet2Board : LiteNet2BoardBase
         base.OnSend += LiteNetOnSend;
     }
 
-    private void LiteNetOnSend(LiteNet2BoardBase liteNet2BoardBase, SendCommand send)
+    private void LiteNetOnSend(LiteNet2BoardBase liteNet2BoardBase, BoardSendCommand boardSend)
     {
-        Log?.Invoke("LiteNet > " + send);
-        OnSend?.Invoke(this, send);
+        Log?.Invoke("LiteNet > " + boardSend);
+        OnSend?.Invoke(this, boardSend);
     }
 
     private void LiteNetOnConnectionStatusChanged(LiteNet2BoardBase liteNet2BoardBase, ConnectionStatus connectionStatus)

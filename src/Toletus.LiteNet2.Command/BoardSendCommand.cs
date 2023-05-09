@@ -4,16 +4,16 @@ using Toletus.LiteNet2.Command.Enums;
 
 namespace Toletus.LiteNet2.Command;
 
-public class SendCommand
+public class BoardSendCommand
 {
     private const byte Prefix = 0x53;
     private const byte Suffix = 0xc3;
 
-    public SendCommand(Commands command, byte[]? parameter = null) : this((ushort)command, parameter)
+    public BoardSendCommand(Commands command, byte[]? parameter = null) : this((ushort)command, parameter)
     {
     }
 
-    public SendCommand(ushort comando, byte[]? parameter = null)
+    public BoardSendCommand(ushort comando, byte[]? parameter = null)
     {
         Command = (Commands)comando;
         Payload = GetPayload(comando, parameter);

@@ -5,9 +5,9 @@ using Toletus.LiteNet2.Command.Enums;
 
 namespace Toletus.LiteNet2.Command;
 
-public class ResponseCommand
+public class BoardResponseCommand
 {
-    public ResponseCommand(byte[] response)
+    public BoardResponseCommand(byte[] response)
     {
         /* Payload (20 bytes)
          *

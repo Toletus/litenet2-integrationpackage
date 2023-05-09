@@ -23,11 +23,11 @@ public class LiteNet2BoardBase
     public bool HasFingerprintReader { get; set; }
 
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
-    public event Action<ResponseCommand>? OnResponse;
+    public event Action<BoardResponseCommand>? OnResponse;
     public event IdentificationHandler? OnIdentification;
     public event Action<LiteNet2BoardBase, ConnectionStatus>? OnConnectionStatusChanged;
     public event Action<string>? OnStatus;
-    public event Action<LiteNet2BoardBase, SendCommand>? OnSend;
+    public event Action<LiteNet2BoardBase, BoardSendCommand>? OnSend;
 
     private TcpClient? _tcpClient;
 
@@ -107,7 +107,7 @@ public class LiteNet2BoardBase
         }
         catch (IOException e)
         {
-            Log?.Invoke($"Connection closed. Receive response finised. (IOException)");
+            Log?.Invoke($"Connection closed. Receive boardResponse finised. (IOException)");
             _tcpClient?.Close();
             throw;
         }
@@ -123,9 +123,9 @@ public class LiteNet2BoardBase
         }
     }
 
-    private ResponseCommand ProcessResponse(byte[] resp)
+    private BoardResponseCommand ProcessResponse(byte[] resp)
     {
-        var response = new ResponseCommand(resp);
+        var response = new BoardResponseCommand(resp);
 
         switch (response.Command)
         {
@@ -141,24 +141,24 @@ public class LiteNet2BoardBase
         return response;
     }
 
-    private Identification ProcessIdentificationResponse(ResponseCommand response)
+    private Identification ProcessIdentificationResponse(BoardResponseCommand boardResponse)
     {
         Identification? identification = null;
 
-        switch (response.Command)
+        switch (boardResponse.Command)
         {
             case Commands.IdentificationByKeyboard:
-                identification = new Identification(IdentificationDevice.Keyboard, int.Parse(response.DataString));
+                identification = new Identification(IdentificationDevice.Keyboard, int.Parse(boardResponse.DataString));
                 break;
             case Commands.IdentificationByBarCode:
-                identification = new Identification(IdentificationDevice.BarCode, int.Parse(response.DataString));
+                identification = new Identification(IdentificationDevice.BarCode, int.Parse(boardResponse.DataString));
                 break;
             case Commands.IdentificationByRfId:
-                identification = new Identification(IdentificationDevice.Rfid, int.Parse(response.DataString));
+                identification = new Identification(IdentificationDevice.Rfid, int.Parse(boardResponse.DataString));
                 break;
             case Commands.PositiveIdentificationByFingerprintReader:
             case Commands.NegativeIdentificationByFingerprintReader:
-                identification = new Identification(IdentificationDevice.EmbeddedFingerprint, int.Parse(response.Data.ToString()));
+                identification = new Identification(IdentificationDevice.EmbeddedFingerprint, int.Parse(boardResponse.Data.ToString()));
                 HasFingerprintReader = true;
                 break;
         }
@@ -187,21 +187,21 @@ public class LiteNet2BoardBase
 
     public void Send(Commands command, byte[]? parameter = null)
     {
-        var send = new SendCommand(command, parameter);
+        var send = new BoardSendCommand(command, parameter);
 
         Send(send);
     }
 
     public void Send(ushort comando, byte[]? parameter = null)
     {
-        var send = new SendCommand(comando, parameter);
+        var send = new BoardSendCommand(comando, parameter);
 
         Send(send);
     }
 
-    public void Send(SendCommand send)
+    public void Send(BoardSendCommand boardSend)
     {
-        OnSend?.Invoke(this, send);
+        OnSend?.Invoke(this, boardSend);
 
         if (!Connected) 
         {
@@ -213,7 +213,7 @@ public class LiteNet2BoardBase
 
         try
         {
-            stream.Write(send.Payload, 0, send.Payload.Length);
+            stream.Write(boardSend.Payload, 0, boardSend.Payload.Length);
         }
         catch (SocketException sex)
         {

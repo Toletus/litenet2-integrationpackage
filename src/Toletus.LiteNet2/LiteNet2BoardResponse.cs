@@ -10,160 +10,160 @@ namespace Toletus.LiteNet2;
 
 public partial class LiteNet2Board
 {
-    private void LiteNet2_OnResponse(ResponseCommand response)
+    private void LiteNet2_OnResponse(BoardResponseCommand boardResponse)
     {
-        Log?.Invoke($"LiteNet < {response}");
+        Log?.Invoke($"LiteNet < {boardResponse}");
 
-        switch (response.Command)
+        switch (boardResponse.Command)
         {
             case Commands.GetFirmwareVersion:
-                ProcessFirmwareVersionResponse(response);
+                ProcessFirmwareVersionResponse(boardResponse);
                 break;
             case Commands.GetMac:
-                ProcessMacResponse(response);
+                ProcessMacResponse(boardResponse);
                 break;
             case Commands.Gyre:
             case Commands.GyreTimeout:
-                ProcessGyreResponse(response);
+                ProcessGyreResponse(boardResponse);
                 break;
             case Commands.GetIpMode:
-                ProcessIpModeResponse(response);
+                ProcessIpModeResponse(boardResponse);
                 break;
             case Commands.GetBuzzerMute:
-                ProcessBuzzerMute(response);
+                ProcessBuzzerMute(boardResponse);
                 break;
             case Commands.GetFlowControl:
-                ProcessFlowControl(response);
+                ProcessFlowControl(boardResponse);
                 break;
             case Commands.GetFlowControlExtended:
-                ProcessFlowControlExtended(response);
+                ProcessFlowControlExtended(boardResponse);
                 break;
             case Commands.GetEntryClockwise:
-                ProcessEntryClockwise(response);
+                ProcessEntryClockwise(boardResponse);
                 break;
             case Commands.GetId:
-                ProcessGetId(response);
+                ProcessGetId(boardResponse);
                 break;
             case Commands.GetMessageLine1:
-                ProcessMessageLine1(response);
+                ProcessMessageLine1(boardResponse);
                 break;
             case Commands.GetMessageLine2:
-                ProcessMessageLine2(response);
+                ProcessMessageLine2(boardResponse);
                 break;
             case Commands.GetSerialNumber:
-                ProcessSerialNumber(response);
+                ProcessSerialNumber(boardResponse);
                 break;
             case Commands.GetFingerprintIdentificationMode:
-                ProcessFingerprintIdentificationMode(response);
+                ProcessFingerprintIdentificationMode(boardResponse);
                 break;
             case Commands.GetShowCounters:
-                ProcessShowCounters(response);
+                ProcessShowCounters(boardResponse);
                 break;
             case Commands.GetReleaseDuration:
-                ProcessReleaseDuration(response);
+                ProcessReleaseDuration(boardResponse);
                 break;
             case Commands.GetMenuPassword:
-                ProcessMenuPassword(response);
+                ProcessMenuPassword(boardResponse);
                 break;
         }
 
-        OnResponse?.Invoke(this, response);
+        OnResponse?.Invoke(this, boardResponse);
     }
 
-    private void ProcessMenuPassword(ResponseCommand response)
+    private void ProcessMenuPassword(BoardResponseCommand boardResponse)
     {
-        MenuPassword = response.DataString;
+        MenuPassword = boardResponse.DataString;
     }
 
-    private void ProcessReleaseDuration(ResponseCommand response)
+    private void ProcessReleaseDuration(BoardResponseCommand boardResponse)
     {
-        ReleaseDuration = BitConverter.ToInt32(response.RawData, 0) / 1000;
+        ReleaseDuration = BitConverter.ToInt32(boardResponse.RawData, 0) / 1000;
     }
 
-    private void ProcessShowCounters(ResponseCommand response)
+    private void ProcessShowCounters(BoardResponseCommand boardResponse)
     {
-        ShowCounters = response.Data == 1;
+        ShowCounters = boardResponse.Data == 1;
     }
 
-    private void ProcessFingerprintIdentificationMode(ResponseCommand response)
+    private void ProcessFingerprintIdentificationMode(BoardResponseCommand boardResponse)
     {
-        FingerprintIdentificationMode = (FingerprintIdentificationMode)response.RawData[0];
+        FingerprintIdentificationMode = (FingerprintIdentificationMode)boardResponse.RawData[0];
     }
 
-    private void ProcessSerialNumber(ResponseCommand response)
+    private void ProcessSerialNumber(BoardResponseCommand boardResponse)
     {
-        SerialNumber = BitConverter.ToInt32(response.RawData, 0).ToString();
+        SerialNumber = BitConverter.ToInt32(boardResponse.RawData, 0).ToString();
     }
 
 
-    private void ProcessMessageLine2(ResponseCommand response)
+    private void ProcessMessageLine2(BoardResponseCommand boardResponse)
     {
-        MessageLine2 = response.DataString;
+        MessageLine2 = boardResponse.DataString;
         return;
     }
 
 
-    private void ProcessMessageLine1(ResponseCommand response)
+    private void ProcessMessageLine1(BoardResponseCommand boardResponse)
     {
-        MessageLine1 = response.DataString;
+        MessageLine1 = boardResponse.DataString;
     }
 
 
-    private void ProcessGetId(ResponseCommand response)
+    private void ProcessGetId(BoardResponseCommand boardResponse)
     {
-        Id = response.RawData[0];
+        Id = boardResponse.RawData[0];
     }
 
-    private void ProcessEntryClockwise(ResponseCommand response)
+    private void ProcessEntryClockwise(BoardResponseCommand boardResponse)
     {
-        EntryClockwise = response.Data == 1;
+        EntryClockwise = boardResponse.Data == 1;
     }
 
-    private void ProcessFlowControl(ResponseCommand response)
+    private void ProcessFlowControl(BoardResponseCommand boardResponse)
     {
-        ControlledFlow = (ControlledFlow)response.RawData[0];
+        ControlledFlow = (ControlledFlow)boardResponse.RawData[0];
     }
 
-    private void ProcessFlowControlExtended(ResponseCommand response)
+    private void ProcessFlowControlExtended(BoardResponseCommand boardResponse)
     {
-        ControlledFlowExtended = (ControlledFlowExtended)response.RawData[0];
+        ControlledFlowExtended = (ControlledFlowExtended)boardResponse.RawData[0];
     }
 
-    private void ProcessBuzzerMute(ResponseCommand response)
+    private void ProcessBuzzerMute(BoardResponseCommand boardResponse)
     {
-        BuzzerMute = response.Data == 1;
+        BuzzerMute = boardResponse.Data == 1;
     }
 
-    private void ProcessFirmwareVersionResponse(ResponseCommand response)
+    private void ProcessFirmwareVersionResponse(BoardResponseCommand boardResponse)
     {
-        FirmwareVersion = $"{string.Join(".", response.RawData.Take(3))}" + $" R{response.RawData[3]}";
+        FirmwareVersion = $"{string.Join(".", boardResponse.RawData.Take(3))}" + $" R{boardResponse.RawData[3]}";
     }
 
-    private void ProcessIpModeResponse(ResponseCommand response)
+    private void ProcessIpModeResponse(BoardResponseCommand boardResponse)
     {
         if (IpConfig == null) return;
         
-        IpConfig.IpMode = (IpMode)response.RawData[0];
-        IpConfig.FixedIp = new IPAddress(response.RawData.Skip(1).Take(4).Reverse().ToArray());
-        IpConfig.SubnetMask = new IPAddress(response.RawData.Skip(5).Take(4).Reverse().ToArray());
+        IpConfig.IpMode = (IpMode)boardResponse.RawData[0];
+        IpConfig.FixedIp = new IPAddress(boardResponse.RawData.Skip(1).Take(4).Reverse().ToArray());
+        IpConfig.SubnetMask = new IPAddress(boardResponse.RawData.Skip(5).Take(4).Reverse().ToArray());
     }
 
-    private void ProcessGyreResponse(ResponseCommand response)
+    private void ProcessGyreResponse(BoardResponseCommand boardResponse)
     {
-        if (response.Command == Commands.Gyre)
+        if (boardResponse.Command == Commands.Gyre)
         {
-            if (response.RawData[0] == 1)
+            if (boardResponse.RawData[0] == 1)
                 OnGyre?.Invoke(this, Direction.Entry);
-            else if (response.RawData[0] == 2)
+            else if (boardResponse.RawData[0] == 2)
                 OnGyre?.Invoke(this, Direction.Exit);
         }
-        else if (response.Command == Commands.GyreTimeout)
+        else if (boardResponse.Command == Commands.GyreTimeout)
             OnGyre?.Invoke(this, Direction.None);
     }
 
-    private void ProcessMacResponse(ResponseCommand response)
+    private void ProcessMacResponse(BoardResponseCommand boardResponse)
     {
-        Mac = response.RawData.Take(6).ToArray().ToHexString(" ");
+        Mac = boardResponse.RawData.Take(6).ToArray().ToHexString(" ");
 
         if (string.IsNullOrEmpty(Description)) Description = Mac;
     }
