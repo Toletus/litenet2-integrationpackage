@@ -21,7 +21,7 @@ public class NetworkInterfaceUtil
         return redes;
     }
 
-    public static IPAddress GetNetworkInterfaceIpAddressByName(string networkInterfaceName)
+    public static IPAddress? GetNetworkInterfaceIpAddressByName(string networkInterfaceName)
     {
         var adaptors = NetworkInterface.GetAllNetworkInterfaces().ToList();
         var adaptor = adaptors.FirstOrDefault(c => c.Name == networkInterfaceName);

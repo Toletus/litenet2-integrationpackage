@@ -15,11 +15,11 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     public delegate void ResponseHandler(LiteNet2Board liteNet2Board, ResponseCommand responseCommand);
     public delegate void SendHandler(LiteNet2Board liteNet2Board, SendCommand sendCommand);
 
-    public event Action<bool> OnFingerprintReaderConnected;
-    public event Action<string> OnReady;
-    public event GyreHandler OnGyre;
-    public new event SendHandler OnSend;
-    public new event ResponseHandler OnResponse;
+    public event Action<bool>? OnFingerprintReaderConnected;
+    public event Action<string>? OnReady;
+    public event GyreHandler? OnGyre;
+    public new event SendHandler? OnSend;
+    public new event ResponseHandler? OnResponse;
 
     public LiteNet2Board(IPAddress ip, int id) : base(ip, id)
     {
@@ -47,9 +47,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
                 CreateFingerprintReaderAndTest();
         }
         else
-        {
             EventStatus(connectionStatus.ToString());
-        }
     }
 
     public new void Close()

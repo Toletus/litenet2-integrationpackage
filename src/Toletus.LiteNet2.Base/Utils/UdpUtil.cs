@@ -10,7 +10,7 @@ namespace Toletus.LiteNet2.Base.Utils;
 public class UdpUtil
 {
     public delegate void UdpResponseHandler(UdpClient udpClient, Task<UdpReceiveResult> response);
-    public static event UdpResponseHandler OnUdpResponse;
+    public static event UdpResponseHandler? OnUdpResponse;
 
     public static void Send(IPAddress iPAdress, int port, string content)
     {

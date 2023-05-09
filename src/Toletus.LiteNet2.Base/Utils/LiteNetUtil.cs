@@ -11,33 +11,33 @@ namespace Toletus.LiteNet2.Base.Utils;
 public class LiteNetUtil
 {
     const string ToletusLiteNet2 = "TOLETUS LiteNet2";
-    private static List<LiteNet2BoardBase>? _liteNets;
+    private static List<LiteNet2BoardBase> _liteNets = new();
 
     static LiteNetUtil()
     {
         UdpUtil.OnUdpResponse += OnUdpResponse;
     }
 
-    public static List<LiteNet2BoardBase> Search(IPAddress iPAdress)
+    public static List<LiteNet2BoardBase>? Search(IPAddress networkIpAddress)
     {
-        _liteNets = new List<LiteNet2BoardBase>();
+        _liteNets.Clear();
 
-        UdpUtil.Send(iPAdress, 7878, "prc");
+        UdpUtil.Send(networkIpAddress, 7878, "prc");
 
         foreach (var liteNet in _liteNets)
-            liteNet.NetworkIp = iPAdress;
+            liteNet.NetworkIp = networkIpAddress;
 
         return _liteNets;
     }
 
-    public static LiteNet2BoardBase Search(string networkInterfaceName, int? id)
+    public static LiteNet2BoardBase? Search(string networkInterfaceName, int? id)
     {
         var liteNets = Search(networkInterfaceName);
 
         return liteNets?.FirstOrDefault(c => id == null || c.Id == id);
     }
 
-    public static List<LiteNet2BoardBase> Search(string networkInterfaceName)
+    public static List<LiteNet2BoardBase>? Search(string networkInterfaceName)
     {
         var ip = NetworkInterfaceUtil.GetNetworkInterfaceIpAddressByName(networkInterfaceName);
 

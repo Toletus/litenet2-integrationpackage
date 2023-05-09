@@ -23,15 +23,15 @@ public class LiteNet2BoardBase
     public bool HasFingerprintReader { get; set; }
 
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
-    public event Action<ResponseCommand> OnResponse;
-    public event IdentificationHandler OnIdentification;
-    public event Action<LiteNet2BoardBase, ConnectionStatus> OnConnectionStatusChanged;
-    public event Action<string> OnStatus;
-    public event Action<LiteNet2BoardBase, SendCommand> OnSend;
+    public event Action<ResponseCommand>? OnResponse;
+    public event IdentificationHandler? OnIdentification;
+    public event Action<LiteNet2BoardBase, ConnectionStatus>? OnConnectionStatusChanged;
+    public event Action<string>? OnStatus;
+    public event Action<LiteNet2BoardBase, SendCommand>? OnSend;
 
-    protected TcpClient TcpClient;
+    private TcpClient? _tcpClient;
 
-    public bool Connected => TcpClient?.Client != null &&  TcpClient.Connected;
+    public bool Connected => _tcpClient?.Client != null &&  _tcpClient.Connected;
 
     public LiteNet2BoardBase(IPAddress ip, int? id = null)
     {
@@ -39,17 +39,14 @@ public class LiteNet2BoardBase
         if (id.HasValue) Id = id.Value;
     }
 
-    public override string ToString()
-    {
-        return $"LiteNet2 #{Id} {Ip}:{Port}";
-    }
+    public override string ToString() => $"LiteNet2 #{Id} {Ip}:{Port}";
 
     public void Connect()
     {
         try
         {
-            TcpClient = new TcpClient();
-            TcpClient.Connect(Ip, Port);
+            _tcpClient = new TcpClient();
+            _tcpClient.Connect(Ip, Port);
 
             _ = Response();
 
@@ -72,7 +69,7 @@ public class LiteNet2BoardBase
 
     public void Close()
     {
-        TcpClient?.Close();
+        _tcpClient?.Close();
         OnConnectionStatusChanged?.Invoke(this, ConnectionStatus.Closed);
     }
 
@@ -83,13 +80,13 @@ public class LiteNet2BoardBase
         var buffer = new byte[1024];
         try
         {
-            var bytesLidos = 1;
+            var bytesRead = 1;
 
-            while (bytesLidos != 0)
+            while (bytesRead != 0)
             {
-                bytesLidos = await TcpClient.GetStream().ReadAsync(buffer, 0, buffer.Length);
+                bytesRead = await _tcpClient!.GetStream().ReadAsync(buffer, 0, buffer.Length);
 
-                var respFull = buffer.Take(bytesLidos).ToArray();
+                var respFull = buffer.Take(bytesRead).ToArray();
 
                 var skip = 0;
                 while (respFull.Length > skip)
@@ -111,7 +108,7 @@ public class LiteNet2BoardBase
         catch (IOException e)
         {
             Log?.Invoke($"Connection closed. Receive response finised. (IOException)");
-            TcpClient.Close();
+            _tcpClient?.Close();
             throw;
         }
         catch (Exception e)
@@ -146,7 +143,7 @@ public class LiteNet2BoardBase
 
     private Identification ProcessIdentificationResponse(ResponseCommand response)
     {
-        Identification identification = null;
+        Identification? identification = null;
 
         switch (response.Command)
         {
@@ -166,9 +163,9 @@ public class LiteNet2BoardBase
                 break;
         }
 
-        OnIdentification?.Invoke(this, identification);
+        OnIdentification?.Invoke(this, identification!);
 
-        return identification;
+        return identification!;
     }
 
     public void Send(Commands command, int parameter)
@@ -212,7 +209,7 @@ public class LiteNet2BoardBase
             return;
         }
 
-        var stream = TcpClient.GetStream();
+        var stream = _tcpClient.GetStream();
 
         try
         {
@@ -220,17 +217,17 @@ public class LiteNet2BoardBase
         }
         catch (SocketException sex)
         {
-            TcpClient?.Close();
+            _tcpClient?.Close();
             throw;
         }
-        catch (System.IO.IOException iox)
+        catch (IOException iox)
         {
-            TcpClient?.Close();
+            _tcpClient?.Close();
             throw;
         }
         catch (Exception e)
         {
-            TcpClient?.Close();
+            _tcpClient?.Close();
             throw;
         }
     }
@@ -238,7 +235,7 @@ public class LiteNet2BoardBase
     private bool _reconnecting;
 
     private void TryReconnect()
-    {
+    { 
         Task.Run(async () =>
         {
             try
@@ -266,8 +263,5 @@ public class LiteNet2BoardBase
         });
     }
 
-    public void EventStatus(string status)
-    {
-        OnStatus?.Invoke(status);
-    }
+    protected void EventStatus(string status) => OnStatus?.Invoke(status);
 }

@@ -141,6 +141,8 @@ public partial class LiteNet2Board
 
     private void ProcessIpModeResponse(ResponseCommand response)
     {
+        if (IpConfig == null) return;
+        
         IpConfig.IpMode = (IpMode)response.RawData[0];
         IpConfig.FixedIp = new IPAddress(response.RawData.Skip(1).Take(4).Reverse().ToArray());
         IpConfig.SubnetMask = new IPAddress(response.RawData.Skip(5).Take(4).Reverse().ToArray());
