@@ -6,7 +6,7 @@ using System.Net.Sockets;
 
 namespace Toletus.LiteNet2.Base.Utils;
 
-public class NetworkInterfaceUtil
+public abstract class NetworkInterfaceUtil
 {
     public static Dictionary<string, IPAddress> GetNetworkInterfaces()
     {
@@ -15,8 +15,7 @@ public class NetworkInterfaceUtil
         foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
         foreach (var ip in nic.GetIPProperties().UnicastAddresses)
             if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                if (!redes.ContainsKey(nic.Name))
-                    redes.Add(nic.Name, ip.Address);
+                redes.TryAdd(nic.Name, ip.Address);
 
         return redes;
     }
@@ -26,7 +25,8 @@ public class NetworkInterfaceUtil
         var adaptors = NetworkInterface.GetAllNetworkInterfaces().ToList();
         var adaptor = adaptors.FirstOrDefault(c => c.Name == networkInterfaceName);
 
-        return adaptor?.GetIPProperties()?.UnicastAddresses
+        return adaptor?.GetIPProperties()
+            .UnicastAddresses
             .FirstOrDefault(c => c.Address.AddressFamily == AddressFamily.InterNetwork)?.Address;
     }
 }

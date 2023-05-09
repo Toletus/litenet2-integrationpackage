@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Toletus.LiteNet2.Base.Utils;
 
-public class UdpUtil
+public abstract class UdpUtil
 {
     public delegate void UdpResponseHandler(UdpClient udpClient, Task<UdpReceiveResult> response);
     public static event UdpResponseHandler? OnUdpResponse;

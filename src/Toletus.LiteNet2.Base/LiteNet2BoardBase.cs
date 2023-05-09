@@ -18,7 +18,7 @@ public class LiteNet2BoardBase
     public const int Port = 7878;
 
     public IPAddress Ip { get; set; }
-    public IPAddress NetworkIp { get; set; }
+    public IPAddress? NetworkIp { get; set; }
     public int Id { get; set; }
     public bool HasFingerprintReader { get; set; }
 
@@ -209,7 +209,7 @@ public class LiteNet2BoardBase
             return;
         }
 
-        var stream = _tcpClient.GetStream();
+        var stream = _tcpClient!.GetStream();
 
         try
         {

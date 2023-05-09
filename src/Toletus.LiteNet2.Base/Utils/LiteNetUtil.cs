@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Toletus.LiteNet2.Base.Utils;
 
-public class LiteNetUtil
+public abstract class LiteNetUtil
 {
     const string ToletusLiteNet2 = "TOLETUS LiteNet2";
     private static List<LiteNet2BoardBase> _liteNets = new();
