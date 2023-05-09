@@ -14,16 +14,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Toletus.SM25" Version="7.5.1"/>
+        <PackageReference Include="Toletus.SM25" Version="7.10.1" />
     </ItemGroup>
 
     <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
         <ItemGroup>
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))"/>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
         </ItemGroup>
     </Target>
 
