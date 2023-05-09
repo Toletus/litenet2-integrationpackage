@@ -1,15 +1,14 @@
-﻿namespace Toletus.LiteNet2.Command.Enums
+﻿namespace Toletus.LiteNet2.Command.Enums;
+
+public enum ControlledFlowExtended
 {
-    public enum ControlledFlowExtended
-    {
-        EntryControlledWithExitFree,
-        EntryControlledWithExitBlocked,
-        EntryControlledWithExitControlled,
-        EntryFreeWithExitControlled,
-        EntryBlockedWithExitControlled,
-        EntryFreeWithExitFree,
-        EntryFreeWithExitBlocked,
-        EntryBlockedWithExitFree,
-        EntryBlockedWithExitBlocked
-    }
+    EntryControlledWithExitFree,
+    EntryControlledWithExitBlocked,
+    EntryControlledWithExitControlled,
+    EntryFreeWithExitControlled,
+    EntryBlockedWithExitControlled,
+    EntryFreeWithExitFree,
+    EntryFreeWithExitBlocked,
+    EntryBlockedWithExitFree,
+    EntryBlockedWithExitBlocked
 }

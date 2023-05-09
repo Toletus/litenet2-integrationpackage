@@ -1,8 +1,7 @@
-﻿namespace Toletus.LiteNet2.Command.Enums
+﻿namespace Toletus.LiteNet2.Command.Enums;
+
+public enum FingerprintIdentificationMode
 {
-    public enum FingerprintIdentificationMode
-    {
-        Embedded = 0,
-        GetTemplate = 1
-    }
+    Embedded = 0,
+    GetTemplate = 1
 }

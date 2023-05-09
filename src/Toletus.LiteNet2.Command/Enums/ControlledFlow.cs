@@ -1,10 +1,9 @@
-﻿namespace Toletus.LiteNet2.Command.Enums
+﻿namespace Toletus.LiteNet2.Command.Enums;
+
+public enum ControlledFlow
 {
-    public enum ControlledFlow
-    {
-        None,
-        Entry,
-        Exit, 
-        Both
-    }
+    None,
+    Entry,
+    Exit, 
+    Both
 }

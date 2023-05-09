@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel;
 
-namespace Toletus.LiteNet2.Enums
+namespace Toletus.LiteNet2.Enums;
+
+public enum IpMode
 {
-    public enum IpMode
-    {
-        [Description("Dynamic (DHCP)")]
-        Dynamic,
-        [Description("Fixed")]
-        Fixed
-    }
+    [Description("Dynamic (DHCP)")]
+    Dynamic,
+    [Description("Fixed")]
+    Fixed
 }

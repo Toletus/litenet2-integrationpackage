@@ -1,9 +1,8 @@
-﻿namespace Toletus.LiteNet2.Enums
+﻿namespace Toletus.LiteNet2.Enums;
+
+public enum Direction
 {
-    public enum Direction
-    {
-        Entry,
-        Exit,
-        None
-    }
+    Entry,
+    Exit,
+    None
 }

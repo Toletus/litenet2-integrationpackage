@@ -1,11 +1,10 @@
-﻿namespace Toletus.LiteNet2.Command.Enums
+﻿namespace Toletus.LiteNet2.Command.Enums;
+
+public enum IdentificationDevice
 {
-    public enum IdentificationDevice
-    {
-        Keyboard,
-        BarCode,
-        Rfid,
-        EmbeddedFingerprint,
-        TemplateFingerprint
-    }
+    Keyboard,
+    BarCode,
+    Rfid,
+    EmbeddedFingerprint,
+    TemplateFingerprint
 }

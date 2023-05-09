@@ -3,17 +3,27 @@
 	<PropertyGroup>
 		<TargetFramework>net7</TargetFramework>
 		<Nullable>enable</Nullable>
+		<DebugType>embedded</DebugType>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+		
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="5.0.5" />
+		<ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" PrivateAssets="all" />
+		<ProjectReference Include="..\Toletus.LiteNet2.Command\Toletus.LiteNet2.Command.csproj" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Toletus.Extensions\Toletus.Extensions.csproj" />
-		<ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" />
-		<ProjectReference Include="..\Toletus.LiteNet2.Command\Toletus.LiteNet2.Command.csproj" />
-		<ProjectReference Include="..\Toletus.SM25\Toletus.SM25.csproj" />
+	  <PackageReference Include="Toletus.SM25" Version="7.4.1" />
 	</ItemGroup>
+
+	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+		<ItemGroup>
+			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
+		</ItemGroup>
+	</Target>
 
 </Project>

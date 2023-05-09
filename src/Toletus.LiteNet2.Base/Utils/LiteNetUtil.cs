@@ -6,56 +6,55 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Toletus.LiteNet2.Base.Utils
+namespace Toletus.LiteNet2.Base.Utils;
+
+public class LiteNetUtil
 {
-    public class LiteNetUtil
+    const string ToletusLiteNet2 = "TOLETUS LiteNet2";
+    private static List<LiteNet2BoardBase>? _liteNets;
+
+    static LiteNetUtil()
     {
-        const string ToletusLiteNet2 = "TOLETUS LiteNet2";
-        private static List<LiteNet2BoardBase> _liteNets;
+        UdpUtil.OnUdpResponse += OnUdpResponse;
+    }
 
-        static LiteNetUtil()
-        {
-            UdpUtil.OnUdpResponse += OnUdpResponse;
-        }
+    public static List<LiteNet2BoardBase> Search(IPAddress iPAdress)
+    {
+        _liteNets = new List<LiteNet2BoardBase>();
 
-        public static List<LiteNet2BoardBase> Search(IPAddress iPAdress)
-        {
-            _liteNets = new List<LiteNet2BoardBase>();
+        UdpUtil.Send(iPAdress, 7878, "prc");
 
-            UdpUtil.Send(iPAdress, 7878, "prc");
+        foreach (var liteNet in _liteNets)
+            liteNet.NetworkIp = iPAdress;
 
-            foreach (var liteNet in _liteNets)
-                liteNet.NetworkIp = iPAdress;
+        return _liteNets;
+    }
 
-            return _liteNets;
-        }
+    public static LiteNet2BoardBase Search(string networkInterfaceName, int? id)
+    {
+        var liteNets = Search(networkInterfaceName);
 
-        public static LiteNet2BoardBase Search(string networkInterfaceName, int? id)
-        {
-            var liteNets = Search(networkInterfaceName);
+        return liteNets?.FirstOrDefault(c => id == null || c.Id == id);
+    }
 
-            return liteNets?.FirstOrDefault(c => id == null || c.Id == id);
-        }
+    public static List<LiteNet2BoardBase> Search(string networkInterfaceName)
+    {
+        var ip = NetworkInterfaceUtil.GetNetworkInterfaceIpAddressByName(networkInterfaceName);
 
-        public static List<LiteNet2BoardBase> Search(string networkInterfaceName)
-        {
-            var ip = NetworkInterfaceUtil.GetNetworkInterfaceIpAddressByName(networkInterfaceName);
+        return ip == null ? null : Search(ip);
+    }
 
-            return ip == null ? null : Search(ip);
-        }
+    private static void OnUdpResponse(UdpClient udpClient, Task<UdpReceiveResult> response)
+    {
+        var device = Encoding.ASCII.GetString(response.Result.Buffer);
 
-        private static void OnUdpResponse(UdpClient udpClient, Task<UdpReceiveResult> response)
-        {
-            var device = Encoding.ASCII.GetString(response.Result.Buffer);
+        if (!device.Contains(ToletusLiteNet2))
+            return;
 
-            if (!device.Contains(ToletusLiteNet2))
-                return;
+        var id = (ushort)Convert.ToInt16(device.Split('@')[1]);
 
-            var id = (ushort)Convert.ToInt16(device.Split('@')[1]);
+        var liteNet = new LiteNet2BoardBase(response.Result.RemoteEndPoint.Address, id);
 
-            var liteNet = new LiteNet2BoardBase(response.Result.RemoteEndPoint.Address, id);
-
-            _liteNets.Add(liteNet);
-        }
+        _liteNets.Add(liteNet);
     }
 }

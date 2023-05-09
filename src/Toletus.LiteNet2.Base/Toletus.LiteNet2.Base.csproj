@@ -29,6 +29,7 @@
 		<ContinuousIntegrationBuild Condition="'$(Configuration)'=='Release'">true</ContinuousIntegrationBuild>
 <!--		<PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>-->
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+		<Nullable>enable</Nullable>
 		
 	</PropertyGroup>
 

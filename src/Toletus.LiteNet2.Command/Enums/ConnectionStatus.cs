@@ -1,8 +1,7 @@
-﻿namespace Toletus.LiteNet2.Command.Enums
+﻿namespace Toletus.LiteNet2.Command.Enums;
+
+public enum ConnectionStatus
 {
-    public enum ConnectionStatus
-    {
-        Connected,
-        Closed
-    }
+    Connected,
+    Closed
 }
