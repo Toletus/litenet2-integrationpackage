@@ -16,8 +16,7 @@
 		<DebugType>embedded</DebugType>
 		<!--		<PackageReadmeFile>README.md</PackageReadmeFile>-->
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-		<PackageProjectUrl>https://github.com/toletus</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/toletus/Toletus.LiteNet2.Base</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/toletus/LiteNet2Board-Package</PackageProjectUrl>
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
 		<NeutralLanguage>en</NeutralLanguage>
@@ -30,7 +29,11 @@
 <!--		<PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>-->
 		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
 		<Nullable>enable</Nullable>
-		
+
+		<RepositoryUrl>https://github.com/Toletus/LiteNet2Board-Package.git</RepositoryUrl>
+		<PackageVersion>$(PackageVersion)</PackageVersion>
+
+
 	</PropertyGroup>
 
 	<ItemGroup>

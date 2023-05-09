@@ -1,28 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7</TargetFramework>
-		<Nullable>enable</Nullable>
-		<DebugType>embedded</DebugType>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PropertyGroup>
+        <TargetFramework>net7</TargetFramework>
+        <Nullable>enable</Nullable>
+        <DebugType>embedded</DebugType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-		
-	</PropertyGroup>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" PrivateAssets="all" />
-	</ItemGroup>
+        <RepositoryUrl>https://github.com/Toletus/LiteNet2Board-Package.git</RepositoryUrl>
+        <PackageVersion>$(PackageVersion)</PackageVersion>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="Toletus.SM25" Version="7.5.1" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" PrivateAssets="all"/>
+    </ItemGroup>
 
-	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
-		<ItemGroup>
-			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
-		</ItemGroup>
-	</Target>
+    <ItemGroup>
+        <PackageReference Include="Toletus.SM25" Version="7.5.1"/>
+    </ItemGroup>
+
+    <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))"/>
+        </ItemGroup>
+    </Target>
 
 </Project>

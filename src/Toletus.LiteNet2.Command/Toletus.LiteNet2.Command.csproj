@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net7</TargetFramework>
     <Nullable>enable</Nullable>
+
+    <RepositoryUrl>https://github.com/Toletus/LiteNet2Board-Package.git</RepositoryUrl>
+    <PackageVersion>$(PackageVersion)</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
