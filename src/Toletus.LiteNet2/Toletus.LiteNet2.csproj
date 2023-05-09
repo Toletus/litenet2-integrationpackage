@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NLog" Version="5.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Toletus.Extensions\Toletus.Extensions.csproj" />
+		<ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" />
+		<ProjectReference Include="..\Toletus.LiteNet2.Command\Toletus.LiteNet2.Command.csproj" />
+		<ProjectReference Include="..\Toletus.SM25\Toletus.SM25.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toletus.LiteNet2.Command", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toletus.LiteNet2.Base", "src\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj", "{69FEF1C8-CDF5-4B71-890F-9810647F9CDF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toletus.LiteNet2", "src\Toletus.LiteNet2\Toletus.LiteNet2.csproj", "{43D5DE15-CF9B-4411-B0AD-819AA7B5C58B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{69FEF1C8-CDF5-4B71-890F-9810647F9CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69FEF1C8-CDF5-4B71-890F-9810647F9CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69FEF1C8-CDF5-4B71-890F-9810647F9CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43D5DE15-CF9B-4411-B0AD-819AA7B5C58B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43D5DE15-CF9B-4411-B0AD-819AA7B5C58B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43D5DE15-CF9B-4411-B0AD-819AA7B5C58B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43D5DE15-CF9B-4411-B0AD-819AA7B5C58B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
