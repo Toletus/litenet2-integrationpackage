@@ -37,5 +37,7 @@ jobs:
         run: |
           dotnet pack "src/Toletus.LiteNet2.Base/Toletus.LiteNet2.Base.csproj" --configuration Release /p:PackageVersion=${{ env.version }}  #-beta
 
-      - name: Publish Toletus.LiteNet2.Base
-        run: dotnet nuget push "src/Toletus.LiteNet2.Base/bin/Release/*.nupkg" -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/actuar/index.json --skip-duplicate
+      - name: Publish Toletus.LiteNet2.Base on Nuget
+        run: dotnet nuget push MyPackage.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
+        
+        

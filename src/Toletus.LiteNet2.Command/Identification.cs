@@ -16,8 +16,8 @@ namespace Toletus.LiteNet2.Command
         public IdentificationDevice Device { get; }
         public int Data { get; }
         public int Id => RfidCard?.RawWeigand ?? Data;
-        public RfidCard RfidCard { get; }
-        public byte[] EmbededTemplate { get; }
+        public RfidCard? RfidCard { get; }
+        public byte[]? EmbededTemplate { get; }
 
         public override string ToString()
         {

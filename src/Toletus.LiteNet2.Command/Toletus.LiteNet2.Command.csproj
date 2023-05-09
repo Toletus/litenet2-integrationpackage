@@ -5,4 +5,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Toletus.Extensions" Version="7.8.1" />
+  </ItemGroup>
+
 </Project>

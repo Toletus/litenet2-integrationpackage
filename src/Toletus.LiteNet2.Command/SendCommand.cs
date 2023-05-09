@@ -9,10 +9,11 @@ namespace Toletus.LiteNet2.Command
         private const byte Prefix = 0x53;
         private const byte Suffix = 0xc3;
 
-        public SendCommand(Commands command, byte[] parameter = null) : this((ushort)command, parameter)
-        { }
+        public SendCommand(Commands command, byte[]? parameter = null) : this((ushort)command, parameter)
+        {
+        }
 
-        public SendCommand(ushort comando, byte[] parameter = null)
+        public SendCommand(ushort comando, byte[]? parameter = null)
         {
             Command = (Commands)comando;
             Payload = GetPayload(comando, parameter);
@@ -21,9 +22,9 @@ namespace Toletus.LiteNet2.Command
         public Commands Command { get; set; }
         public byte[] Payload { get; set; }
 
-        private static byte[] GetPayload(ushort command, byte[] parameter)
+        private static byte[] GetPayload(ushort command, byte[]? parameter)
         {
-            if (parameter == null) parameter = new byte[16];
+            parameter ??= new byte[16];
 
             var payload = new byte[20];
             payload[0] = Prefix;

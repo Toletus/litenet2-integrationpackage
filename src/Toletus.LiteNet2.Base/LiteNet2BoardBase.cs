@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -107,7 +108,7 @@ namespace Toletus.LiteNet2.Base
             {
                 Log?.Invoke($"Response ObjectDisposedException {e.ToLogString(Environment.StackTrace)}");
             }
-            catch (System.IO.IOException e)
+            catch (IOException e)
             {
                 Log?.Invoke($"Connection closed. Receive response finised. (IOException)");
                 TcpClient.Close();

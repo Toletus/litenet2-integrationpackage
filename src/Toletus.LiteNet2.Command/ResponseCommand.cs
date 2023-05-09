@@ -32,7 +32,7 @@ namespace Toletus.LiteNet2.Command
         public byte[] RawData { get; }
         public ushort Data => BitConverter.ToUInt16(RawData, 0);
         public string DataString => RawData.SupressEndWithZeroBytes().ConvertToAsciiString().Trim();
-        public Identification Identification { get; set; }
+        public Identification? Identification { get; set; }
 
         public override string ToString()
         {
