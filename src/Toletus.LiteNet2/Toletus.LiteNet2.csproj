@@ -13,7 +13,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Toletus.LiteNet2.Base\Toletus.LiteNet2.Base.csproj" PrivateAssets="all" />
-		<ProjectReference Include="..\Toletus.LiteNet2.Command\Toletus.LiteNet2.Command.csproj" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
