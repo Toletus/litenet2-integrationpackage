@@ -23,11 +23,11 @@ public class LiteNet2BoardBase
     public bool HasFingerprintReader { get; set; }
 
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
-    public event Action<BoardResponseCommand>? OnResponse;
+    public event Action<BoardResponse>? OnResponse;
     public event IdentificationHandler? OnIdentification;
     public event Action<LiteNet2BoardBase, BoardConnectionStatus>? OnConnectionStatusChanged;
     public event Action<string>? OnStatus;
-    public event Action<LiteNet2BoardBase, BoardSendCommand>? OnSend;
+    public event Action<LiteNet2BoardBase, BoardSend>? OnSend;
 
     private TcpClient? _tcpClient;
 
@@ -123,11 +123,11 @@ public class LiteNet2BoardBase
         }
     }
 
-    private BoardResponseCommand ProcessResponse(byte[] resp)
+    private BoardResponse ProcessResponse(byte[] resp)
     {
-        var response = new BoardResponseCommand(resp);
+        var response = new BoardResponse(resp);
 
-        switch (response.LiteNet2Command)
+        switch (response.Command)
         {
             case LiteNet2Commands.NegativeIdentificationByFingerprintReader:
             case LiteNet2Commands.PositiveIdentificationByFingerprintReader:
@@ -141,11 +141,11 @@ public class LiteNet2BoardBase
         return response;
     }
 
-    private Identification ProcessIdentificationResponse(BoardResponseCommand boardResponse)
+    private Identification ProcessIdentificationResponse(BoardResponse boardResponse)
     {
         Identification? identification = null;
 
-        switch (boardResponse.LiteNet2Command)
+        switch (boardResponse.Command)
         {
             case LiteNet2Commands.IdentificationByKeyboard:
                 identification = new Identification(IdentificationDevice.Keyboard, int.Parse(boardResponse.DataString));
@@ -187,19 +187,19 @@ public class LiteNet2BoardBase
 
     public void Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null)
     {
-        var send = new BoardSendCommand(liteNet2Command, parameter);
+        var send = new BoardSend(liteNet2Command, parameter);
 
         Send(send);
     }
 
     public void Send(ushort comando, byte[]? parameter = null)
     {
-        var send = new BoardSendCommand(comando, parameter);
+        var send = new BoardSend(comando, parameter);
 
         Send(send);
     }
 
-    public void Send(BoardSendCommand boardSend)
+    public void Send(BoardSend boardSend)
     {
         OnSend?.Invoke(this, boardSend);
 
