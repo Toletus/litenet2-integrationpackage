@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Toletus.Pack.Core.Utils;
 
 namespace Toletus.LiteNet2.Base.Utils;
 
@@ -15,14 +16,14 @@ public abstract class LiteNetUtil
 
     static LiteNetUtil()
     {
-        UdpUtil.OnUdpResponse += OnUdpResponse;
+        UdpUtils.OnUdpResponse += OnUdpResponse;
     }
 
     public static List<LiteNet2BoardBase>? Search(IPAddress networkIpAddress)
     {
         _liteNets.Clear();
 
-        UdpUtil.Send(networkIpAddress, 7878, "prc");
+        UdpUtils.Send(networkIpAddress, 7878, "prc");
 
         foreach (var liteNet in _liteNets)
             liteNet.NetworkIp = networkIpAddress;
@@ -39,7 +40,7 @@ public abstract class LiteNetUtil
 
     public static List<LiteNet2BoardBase>? Search(string networkInterfaceName)
     {
-        var ip = NetworkInterfaceUtil.GetNetworkInterfaceIpAddressByName(networkInterfaceName);
+        var ip = NetworkInterfaceUtils.GetNetworkInterfaceIpAddressByName(networkInterfaceName);
 
         return ip == null ? null : Search(ip);
     }

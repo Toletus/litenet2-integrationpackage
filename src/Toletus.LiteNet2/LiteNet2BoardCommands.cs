@@ -3,6 +3,7 @@ using System.Text;
 using Toletus.Extensions;
 using Toletus.LiteNet2.Base.Utils;
 using Toletus.LiteNet2.Command.Enums;
+using Toletus.Pack.Core.Utils;
 
 namespace Toletus.LiteNet2;
 
@@ -151,7 +152,7 @@ public partial class LiteNet2Board
         var confIp = dhcp ? "dhcp" : $"{ip} {subnetMask}";
         var content = $"{Id} ip {confIp}";
 
-        UdpUtil.Send(NetworkIp!, 7878, content);
+        UdpUtils.Send(NetworkIp!, 7878, content);
     }
 
     public void SetMenuPassword(string password)
