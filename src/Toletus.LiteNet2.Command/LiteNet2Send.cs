@@ -4,16 +4,16 @@ using Toletus.Pack.Core;
 
 namespace Toletus.LiteNet2.Command;
 
-public class LiteNetSend
+public class LiteNet2Send
 {
     private const byte Prefix = 0x53;
     private const byte Suffix = 0xc3;
 
-    public LiteNetSend(LiteNet2Commands liteNet2Command, byte[]? parameter = null) : this((ushort)liteNet2Command, parameter)
+    public LiteNet2Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null) : this((ushort)liteNet2Command, parameter)
     {
     }
 
-    public LiteNetSend(ushort comando, byte[]? parameter = null)
+    public LiteNet2Send(ushort comando, byte[]? parameter = null)
     {
         LiteNet2Command = (LiteNet2Commands)comando;
         Payload = GetPayload(comando, parameter);

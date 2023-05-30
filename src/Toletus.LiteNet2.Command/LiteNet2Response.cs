@@ -5,9 +5,9 @@ using Toletus.Pack.Core;
 
 namespace Toletus.LiteNet2.Command;
 
-public class LiteNetResponse
+public class LiteNet2Response
 {
-    public LiteNetResponse(byte[] response)
+    public LiteNet2Response(byte[] response)
     {
         /* Payload (20 bytes)
          *

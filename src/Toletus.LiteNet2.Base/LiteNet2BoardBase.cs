@@ -23,11 +23,11 @@ public class LiteNet2BoardBase
     public bool HasFingerprintReader { get; set; }
 
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
-    public event Action<LiteNetResponse>? OnResponse;
+    public event Action<LiteNet2Response>? OnResponse;
     public event IdentificationHandler? OnIdentification;
     public event Action<LiteNet2BoardBase, BoardConnectionStatus>? OnConnectionStatusChanged;
     public event Action<string>? OnStatus;
-    public event Action<LiteNet2BoardBase, LiteNetSend>? OnSend;
+    public event Action<LiteNet2BoardBase, LiteNet2Send>? OnSend;
 
     private TcpClient? _tcpClient;
 
@@ -123,9 +123,9 @@ public class LiteNet2BoardBase
         }
     }
 
-    private LiteNetResponse ProcessResponse(byte[] resp)
+    private LiteNet2Response ProcessResponse(byte[] resp)
     {
-        var response = new LiteNetResponse(resp);
+        var response = new LiteNet2Response(resp);
 
         switch (response.Command)
         {
@@ -141,24 +141,24 @@ public class LiteNet2BoardBase
         return response;
     }
 
-    private Identification ProcessIdentificationResponse(LiteNetResponse liteNetResponse)
+    private Identification ProcessIdentificationResponse(LiteNet2Response liteNet2Response)
     {
         Identification? identification = null;
 
-        switch (liteNetResponse.Command)
+        switch (liteNet2Response.Command)
         {
             case LiteNet2Commands.IdentificationByKeyboard:
-                identification = new Identification(IdentificationDevice.Keyboard, int.Parse(liteNetResponse.DataString));
+                identification = new Identification(IdentificationDevice.Keyboard, int.Parse(liteNet2Response.DataString));
                 break;
             case LiteNet2Commands.IdentificationByBarCode:
-                identification = new Identification(IdentificationDevice.BarCode, int.Parse(liteNetResponse.DataString));
+                identification = new Identification(IdentificationDevice.BarCode, int.Parse(liteNet2Response.DataString));
                 break;
             case LiteNet2Commands.IdentificationByRfId:
-                identification = new Identification(IdentificationDevice.Rfid, int.Parse(liteNetResponse.DataString));
+                identification = new Identification(IdentificationDevice.Rfid, int.Parse(liteNet2Response.DataString));
                 break;
             case LiteNet2Commands.PositiveIdentificationByFingerprintReader:
             case LiteNet2Commands.NegativeIdentificationByFingerprintReader:
-                identification = new Identification(IdentificationDevice.EmbeddedFingerprint, int.Parse(liteNetResponse.Data.ToString()));
+                identification = new Identification(IdentificationDevice.EmbeddedFingerprint, int.Parse(liteNet2Response.Data.ToString()));
                 HasFingerprintReader = true;
                 break;
         }
@@ -187,21 +187,21 @@ public class LiteNet2BoardBase
 
     public void Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null)
     {
-        var send = new LiteNetSend(liteNet2Command, parameter);
+        var send = new LiteNet2Send(liteNet2Command, parameter);
 
         Send(send);
     }
 
     public void Send(ushort comando, byte[]? parameter = null)
     {
-        var send = new LiteNetSend(comando, parameter);
+        var send = new LiteNet2Send(comando, parameter);
 
         Send(send);
     }
 
-    public void Send(LiteNetSend liteNetSend)
+    public void Send(LiteNet2Send liteNet2Send)
     {
-        OnSend?.Invoke(this, liteNetSend);
+        OnSend?.Invoke(this, liteNet2Send);
 
         if (!Connected) 
         {
@@ -213,7 +213,7 @@ public class LiteNet2BoardBase
 
         try
         {
-            stream.Write(liteNetSend.Payload, 0, liteNetSend.Payload.Length);
+            stream.Write(liteNet2Send.Payload, 0, liteNet2Send.Payload.Length);
         }
         catch (SocketException sex)
         {
