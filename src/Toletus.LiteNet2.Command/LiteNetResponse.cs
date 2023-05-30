@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Toletus.Extensions;
 using Toletus.LiteNet2.Command.Enums;
+using Toletus.Pack.Core;
 
 namespace Toletus.LiteNet2.Command;
 
-public class BoardResponse
+public class LiteNetResponse
 {
-    public BoardResponse(byte[] response)
+    public LiteNetResponse(byte[] response)
     {
         /* Payload (20 bytes)
          *

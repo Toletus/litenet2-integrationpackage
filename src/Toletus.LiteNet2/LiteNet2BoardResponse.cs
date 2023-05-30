@@ -1,169 +1,169 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using Toletus.Extensions;
 using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.LiteNet2.Enums;
+using Toletus.Pack.Core;
 
 namespace Toletus.LiteNet2;
 
 public partial class LiteNet2Board
 {
-    private void LiteNet2_OnResponse(BoardResponse boardResponse)
+    private void LiteNet2_OnResponse(LiteNetResponse liteNetResponse)
     {
-        Log?.Invoke($"LiteNet < {boardResponse}");
+        Log?.Invoke($"LiteNet < {liteNetResponse}");
 
-        switch (boardResponse.Command)
+        switch (liteNetResponse.Command)
         {
             case LiteNet2Commands.GetFirmwareVersion:
-                ProcessFirmwareVersionResponse(boardResponse);
+                ProcessFirmwareVersionResponse(liteNetResponse);
                 break;
             case LiteNet2Commands.GetMac:
-                ProcessMacResponse(boardResponse);
+                ProcessMacResponse(liteNetResponse);
                 break;
             case LiteNet2Commands.Gyre:
             case LiteNet2Commands.GyreTimeout:
-                ProcessGyreResponse(boardResponse);
+                ProcessGyreResponse(liteNetResponse);
                 break;
             case LiteNet2Commands.GetIpMode:
-                ProcessIpModeResponse(boardResponse);
+                ProcessIpModeResponse(liteNetResponse);
                 break;
             case LiteNet2Commands.GetBuzzerMute:
-                ProcessBuzzerMute(boardResponse);
+                ProcessBuzzerMute(liteNetResponse);
                 break;
             case LiteNet2Commands.GetFlowControl:
-                ProcessFlowControl(boardResponse);
+                ProcessFlowControl(liteNetResponse);
                 break;
             case LiteNet2Commands.GetFlowControlExtended:
-                ProcessFlowControlExtended(boardResponse);
+                ProcessFlowControlExtended(liteNetResponse);
                 break;
             case LiteNet2Commands.GetEntryClockwise:
-                ProcessEntryClockwise(boardResponse);
+                ProcessEntryClockwise(liteNetResponse);
                 break;
             case LiteNet2Commands.GetId:
-                ProcessGetId(boardResponse);
+                ProcessGetId(liteNetResponse);
                 break;
             case LiteNet2Commands.GetMessageLine1:
-                ProcessMessageLine1(boardResponse);
+                ProcessMessageLine1(liteNetResponse);
                 break;
             case LiteNet2Commands.GetMessageLine2:
-                ProcessMessageLine2(boardResponse);
+                ProcessMessageLine2(liteNetResponse);
                 break;
             case LiteNet2Commands.GetSerialNumber:
-                ProcessSerialNumber(boardResponse);
+                ProcessSerialNumber(liteNetResponse);
                 break;
             case LiteNet2Commands.GetFingerprintIdentificationMode:
-                ProcessFingerprintIdentificationMode(boardResponse);
+                ProcessFingerprintIdentificationMode(liteNetResponse);
                 break;
             case LiteNet2Commands.GetShowCounters:
-                ProcessShowCounters(boardResponse);
+                ProcessShowCounters(liteNetResponse);
                 break;
             case LiteNet2Commands.GetReleaseDuration:
-                ProcessReleaseDuration(boardResponse);
+                ProcessReleaseDuration(liteNetResponse);
                 break;
             case LiteNet2Commands.GetMenuPassword:
-                ProcessMenuPassword(boardResponse);
+                ProcessMenuPassword(liteNetResponse);
                 break;
         }
 
-        OnResponse?.Invoke(this, boardResponse);
+        OnResponse?.Invoke(this, liteNetResponse);
     }
 
-    private void ProcessMenuPassword(BoardResponse boardResponse)
+    private void ProcessMenuPassword(LiteNetResponse liteNetResponse)
     {
-        MenuPassword = boardResponse.DataString;
+        MenuPassword = liteNetResponse.DataString;
     }
 
-    private void ProcessReleaseDuration(BoardResponse boardResponse)
+    private void ProcessReleaseDuration(LiteNetResponse liteNetResponse)
     {
-        ReleaseDuration = BitConverter.ToInt32(boardResponse.RawData, 0) / 1000;
+        ReleaseDuration = BitConverter.ToInt32(liteNetResponse.RawData, 0) / 1000;
     }
 
-    private void ProcessShowCounters(BoardResponse boardResponse)
+    private void ProcessShowCounters(LiteNetResponse liteNetResponse)
     {
-        ShowCounters = boardResponse.Data == 1;
+        ShowCounters = liteNetResponse.Data == 1;
     }
 
-    private void ProcessFingerprintIdentificationMode(BoardResponse boardResponse)
+    private void ProcessFingerprintIdentificationMode(LiteNetResponse liteNetResponse)
     {
-        FingerprintIdentificationMode = (FingerprintIdentificationMode)boardResponse.RawData[0];
+        FingerprintIdentificationMode = (FingerprintIdentificationMode)liteNetResponse.RawData[0];
     }
 
-    private void ProcessSerialNumber(BoardResponse boardResponse)
+    private void ProcessSerialNumber(LiteNetResponse liteNetResponse)
     {
-        SerialNumber = BitConverter.ToInt32(boardResponse.RawData, 0).ToString();
+        SerialNumber = BitConverter.ToInt32(liteNetResponse.RawData, 0).ToString();
     }
 
 
-    private void ProcessMessageLine2(BoardResponse boardResponse)
+    private void ProcessMessageLine2(LiteNetResponse liteNetResponse)
     {
-        MessageLine2 = boardResponse.DataString;
+        MessageLine2 = liteNetResponse.DataString;
         return;
     }
 
 
-    private void ProcessMessageLine1(BoardResponse boardResponse)
+    private void ProcessMessageLine1(LiteNetResponse liteNetResponse)
     {
-        MessageLine1 = boardResponse.DataString;
+        MessageLine1 = liteNetResponse.DataString;
     }
 
 
-    private void ProcessGetId(BoardResponse boardResponse)
+    private void ProcessGetId(LiteNetResponse liteNetResponse)
     {
-        Id = boardResponse.RawData[0];
+        Id = liteNetResponse.RawData[0];
     }
 
-    private void ProcessEntryClockwise(BoardResponse boardResponse)
+    private void ProcessEntryClockwise(LiteNetResponse liteNetResponse)
     {
-        EntryClockwise = boardResponse.Data == 1;
+        EntryClockwise = liteNetResponse.Data == 1;
     }
 
-    private void ProcessFlowControl(BoardResponse boardResponse)
+    private void ProcessFlowControl(LiteNetResponse liteNetResponse)
     {
-        ControlledFlow = (ControlledFlow)boardResponse.RawData[0];
+        ControlledFlow = (ControlledFlow)liteNetResponse.RawData[0];
     }
 
-    private void ProcessFlowControlExtended(BoardResponse boardResponse)
+    private void ProcessFlowControlExtended(LiteNetResponse liteNetResponse)
     {
-        ControlledFlowExtended = (ControlledFlowExtended)boardResponse.RawData[0];
+        ControlledFlowExtended = (ControlledFlowExtended)liteNetResponse.RawData[0];
     }
 
-    private void ProcessBuzzerMute(BoardResponse boardResponse)
+    private void ProcessBuzzerMute(LiteNetResponse liteNetResponse)
     {
-        BuzzerMute = boardResponse.Data == 1;
+        BuzzerMute = liteNetResponse.Data == 1;
     }
 
-    private void ProcessFirmwareVersionResponse(BoardResponse boardResponse)
+    private void ProcessFirmwareVersionResponse(LiteNetResponse liteNetResponse)
     {
-        FirmwareVersion = $"{string.Join(".", boardResponse.RawData.Take(3))}" + $" R{boardResponse.RawData[3]}";
+        FirmwareVersion = $"{string.Join(".", liteNetResponse.RawData.Take(3))}" + $" R{liteNetResponse.RawData[3]}";
     }
 
-    private void ProcessIpModeResponse(BoardResponse boardResponse)
+    private void ProcessIpModeResponse(LiteNetResponse liteNetResponse)
     {
         if (IpConfig == null) return;
         
-        IpConfig.IpMode = (IpMode)boardResponse.RawData[0];
-        IpConfig.FixedIp = new IPAddress(boardResponse.RawData.Skip(1).Take(4).Reverse().ToArray());
-        IpConfig.SubnetMask = new IPAddress(boardResponse.RawData.Skip(5).Take(4).Reverse().ToArray());
+        IpConfig.IpMode = (IpMode)liteNetResponse.RawData[0];
+        IpConfig.FixedIp = new IPAddress(liteNetResponse.RawData.Skip(1).Take(4).Reverse().ToArray());
+        IpConfig.SubnetMask = new IPAddress(liteNetResponse.RawData.Skip(5).Take(4).Reverse().ToArray());
     }
 
-    private void ProcessGyreResponse(BoardResponse boardResponse)
+    private void ProcessGyreResponse(LiteNetResponse liteNetResponse)
     {
-        if (boardResponse.Command == LiteNet2Commands.Gyre)
+        if (liteNetResponse.Command == LiteNet2Commands.Gyre)
         {
-            if (boardResponse.RawData[0] == 1)
+            if (liteNetResponse.RawData[0] == 1)
                 OnGyre?.Invoke(this, Direction.Entry);
-            else if (boardResponse.RawData[0] == 2)
+            else if (liteNetResponse.RawData[0] == 2)
                 OnGyre?.Invoke(this, Direction.Exit);
         }
-        else if (boardResponse.Command == LiteNet2Commands.GyreTimeout)
+        else if (liteNetResponse.Command == LiteNet2Commands.GyreTimeout)
             OnGyre?.Invoke(this, Direction.None);
     }
 
-    private void ProcessMacResponse(BoardResponse boardResponse)
+    private void ProcessMacResponse(LiteNetResponse liteNetResponse)
     {
-        Mac = boardResponse.RawData.Take(6).ToArray().ToHexString(" ");
+        Mac = liteNetResponse.RawData.Take(6).ToArray().ToHexString(" ");
 
         if (string.IsNullOrEmpty(Description)) Description = Mac;
     }
