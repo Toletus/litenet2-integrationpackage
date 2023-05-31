@@ -17,7 +17,7 @@ namespace FullConsoleAppExample
             LiteNet2 = liteNet;
             LiteNet2.OnResponse += LiteNet2_OnResponse;
 
-            LiteNet2.Connect();
+            //LiteNet2.Connect();
 
             Menu();
         }

@@ -29,7 +29,11 @@ namespace FullConsoleAppExample.LiteNet
             var menu = new ConsoleMenu();
 
             foreach (var liteNet in liteNets) 
-                menu.Add(liteNet.ToString(), () => SelectLiteNet(liteNet));
+                menu.Add(liteNet.ToString(), () =>
+                {
+                    SelectLiteNet(liteNet);
+                    menu.CloseMenu();
+                });
 
             menu.Add("Return", (c) => c.CloseMenu());
             menu.Show();
