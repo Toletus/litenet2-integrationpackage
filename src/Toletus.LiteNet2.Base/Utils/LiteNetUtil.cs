@@ -53,8 +53,8 @@ public abstract class LiteNetUtil
         if (!device.Contains(ToletusLiteNet2))
             return;
 
-        var m = Regex.Match(device.Split('@')[1], @"(\d+)");
-        var id = (UInt16)Convert.ToInt16(m.Groups[0].Value);
+        var m = Regex.Match(device, @"@(\d+)");
+        var id = (UInt16)Convert.ToInt16(m.Groups[1].Value);
         
         var connectionInfo = string.Empty;
 
