@@ -24,6 +24,12 @@ namespace FullConsoleAppExample
 
         public static void Menu()
         {
+            if (LiteNet2.InUse)
+            {
+                Console.WriteLine("LiteNet2 already in use...");
+                return;
+            }
+
             Console.WriteLine("Connecting to LiteNet2...");
 
             LiteNet2.Connect();

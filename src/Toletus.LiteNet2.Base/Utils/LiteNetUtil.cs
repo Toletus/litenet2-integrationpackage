@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Toletus.Pack.Core.Utils;
 
@@ -52,9 +53,17 @@ public abstract class LiteNetUtil
         if (!device.Contains(ToletusLiteNet2))
             return;
 
-        var id = (ushort)Convert.ToInt16(device.Split('@')[1]);
+        var m = Regex.Match(device, @"(\d+)");
+        var id = (ushort)Convert.ToInt16(m.Groups[0].Value);
 
-        var liteNet = new LiteNet2BoardBase(response.Result.RemoteEndPoint.Address, id);
+        var connectionInfo = string.Empty;
+
+        var start = device.IndexOf('=');
+        
+        if (!(start < 0))
+            connectionInfo = device.Substring(start + 1).Trim();
+
+        var liteNet = new LiteNet2BoardBase(response.Result.RemoteEndPoint.Address, id, connectionInfo);
 
         _liteNets.Add(liteNet);
     }

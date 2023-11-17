@@ -20,9 +20,15 @@ public class LiteNet2BoardBase
     public IPAddress Ip { get; set; }
     public IPAddress? NetworkIp { get; set; }
     public int Id { get; set; }
+    public string ConnectionInfo { get; set; }
+
+    public bool InUse => Connected
+                         || ConnectionInfo.Length > 0 && ConnectionInfo != "Disconnected";
+
     public bool HasFingerprintReader { get; set; }
 
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
+
     public event Action<LiteNet2Response>? OnResponse;
     public event IdentificationHandler? OnIdentification;
     public event Action<LiteNet2BoardBase, BoardConnectionStatus>? OnConnectionStatusChanged;
@@ -31,15 +37,16 @@ public class LiteNet2BoardBase
 
     private TcpClient? _tcpClient;
 
-    public bool Connected => _tcpClient?.Client != null &&  _tcpClient.Connected;
+    public bool Connected => _tcpClient?.Client != null && _tcpClient.Connected;
 
-    public LiteNet2BoardBase(IPAddress ip, int? id = null)
+    public LiteNet2BoardBase(IPAddress ip, int? id = null, string connectionInfo = "")
     {
         Ip = ip;
         if (id.HasValue) Id = id.Value;
+        ConnectionInfo = connectionInfo == "None" ? "Disconnected" : connectionInfo;
     }
 
-    public override string ToString() => $"LiteNet2 #{Id} {Ip}:{Port}";
+    public override string ToString() => $"LiteNet2 #{Id} {Ip}:{Port} {ConnectionInfo}";
 
     public void Connect()
     {
@@ -148,17 +155,20 @@ public class LiteNet2BoardBase
         switch (liteNet2Response.Command)
         {
             case LiteNet2Commands.IdentificationByKeyboard:
-                identification = new Identification(IdentificationDevice.Keyboard, int.Parse(liteNet2Response.DataString));
+                identification =
+                    new Identification(IdentificationDevice.Keyboard, int.Parse(liteNet2Response.DataString));
                 break;
             case LiteNet2Commands.IdentificationByBarCode:
-                identification = new Identification(IdentificationDevice.BarCode, int.Parse(liteNet2Response.DataString));
+                identification =
+                    new Identification(IdentificationDevice.BarCode, int.Parse(liteNet2Response.DataString));
                 break;
             case LiteNet2Commands.IdentificationByRfId:
                 identification = new Identification(IdentificationDevice.Rfid, int.Parse(liteNet2Response.DataString));
                 break;
             case LiteNet2Commands.PositiveIdentificationByFingerprintReader:
             case LiteNet2Commands.NegativeIdentificationByFingerprintReader:
-                identification = new Identification(IdentificationDevice.EmbeddedFingerprint, int.Parse(liteNet2Response.Data.ToString()));
+                identification = new Identification(IdentificationDevice.EmbeddedFingerprint,
+                    int.Parse(liteNet2Response.Data.ToString()));
                 HasFingerprintReader = true;
                 break;
         }
@@ -203,7 +213,7 @@ public class LiteNet2BoardBase
     {
         OnSend?.Invoke(this, liteNet2Send);
 
-        if (!Connected) 
+        if (!Connected)
         {
             TryReconnect();
             return;
@@ -235,7 +245,7 @@ public class LiteNet2BoardBase
     private bool _reconnecting;
 
     private void TryReconnect()
-    { 
+    {
         Task.Run(async () =>
         {
             try
