@@ -20,7 +20,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     public new event SendHandler? OnSend;
     public new event ResponseHandler? OnResponse;
 
-    public LiteNet2Board(IPAddress ip, int id) : base(ip, id)
+    public LiteNet2Board(IPAddress ip, int id, string connectionInfo = "") : base(ip, id, connectionInfo)
     {
         IpConfig = new IpConfig();
         OnConnectionStatusChanged += LiteNetOnConnectionStatusChanged;
@@ -60,10 +60,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
         return new LiteNet2Board(liteNet2BoardBase.Ip, liteNet2BoardBase.Id);
     }
 
-    public override string ToString()
-    {
-        return $"{base.ToString()}" + (HasFingerprintReader ? " Bio" : "") + $" {Description}";
-    }
+    public override string ToString() => $"{base.ToString()}" + (HasFingerprintReader ? " Bio" : "") + $" {Description}";
 
     public void WaitForFingerprintReader()
     {
