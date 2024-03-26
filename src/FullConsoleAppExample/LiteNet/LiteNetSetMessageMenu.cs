@@ -20,7 +20,7 @@ namespace FullConsoleAppExample.LiteNet
 
                 if (string.IsNullOrEmpty(option)) return;
 
-                option = Toletus.Pack.Core.StringExtensions.Truncate(option, 16);
+                option = Toletus.Pack.Core.Extensions.StringExtensions.Truncate(option, 16);
 
                 MainMenu.LiteNet2.Send(command, Encoding.ASCII.GetBytes(option));
 

@@ -2,6 +2,7 @@
 using System.Text;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.Pack.Core;
+using Toletus.Pack.Core.Extensions;
 using Toletus.Pack.Core.Utils;
 
 namespace Toletus.LiteNet2;

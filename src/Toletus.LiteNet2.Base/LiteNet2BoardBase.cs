@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.Pack.Core;
+using Toletus.Pack.Core.Extensions;
 
 namespace Toletus.LiteNet2.Base;
 
