@@ -2,32 +2,31 @@
 using Humanizer;
 using Toletus.LiteNet2.Command.Enums;
 
-namespace FullConsoleAppExample.LiteNet
+namespace FullConsoleAppExample.LiteNet;
+
+internal class LiteNetSetFlowControlExtendedMenu
 {
-    internal class LiteNetSetFlowControlExtendedMenu
+    public static void Menu()
     {
-        public static void Menu()
+        while (true)
         {
-            while (true)
-            {
-                Console.WriteLine("");
-                Console.WriteLine($"{LiteNet2Commands.SetFlowControlExtended}:");
+            Console.WriteLine("");
+            Console.WriteLine($"{LiteNet2Commands.SetFlowControlExtended}:");
 
-                var enumLength = Enum.GetNames(typeof(ControlledFlowExtended)).Length;
+            var enumLength = Enum.GetNames(typeof(ControlledFlowExtended)).Length;
                 
-                for (var i = 0; i < enumLength; i++)
-                    Console.WriteLine($"     {i} - {((ControlledFlowExtended)i).Humanize()}");
+            for (var i = 0; i < enumLength; i++)
+                Console.WriteLine($"     {i} - {((ControlledFlowExtended)i).Humanize()}");
 
-                Console.WriteLine($" other - Return");
+            Console.WriteLine($" other - Return");
 
-                var option = Console.ReadLine();
+            var option = Console.ReadLine();
 
-                if (string.IsNullOrEmpty(option) || !int.TryParse(option, out var flow)) return;
+            if (string.IsNullOrEmpty(option) || !int.TryParse(option, out var flow)) return;
 
-                if (flow >= enumLength) return;
+            if (flow >= enumLength) return;
 
-                MainMenu.LiteNet2.Send(LiteNet2Commands.SetFlowControlExtended, flow);
-            }
+            MainMenu.LiteNet2.Send(LiteNet2Commands.SetFlowControlExtended, flow);
         }
     }
 }

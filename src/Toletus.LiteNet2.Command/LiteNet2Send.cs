@@ -1,6 +1,5 @@
 ﻿using System;
 using Toletus.LiteNet2.Command.Enums;
-using Toletus.Pack.Core;
 using Toletus.Pack.Core.Extensions;
 
 namespace Toletus.LiteNet2.Command;
@@ -10,7 +9,8 @@ public class LiteNet2Send
     private const byte Prefix = 0x53;
     private const byte Suffix = 0xc3;
 
-    public LiteNet2Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null) : this((ushort)liteNet2Command, parameter)
+    public LiteNet2Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null) : this((ushort)liteNet2Command,
+        parameter)
     {
     }
 

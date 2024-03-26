@@ -3,29 +3,28 @@ using System.Text;
 using Humanizer;
 using Toletus.LiteNet2.Command.Enums;
 
-namespace FullConsoleAppExample.LiteNet
+namespace FullConsoleAppExample.LiteNet;
+
+internal class LiteNetSetMessageMenu
 {
-    internal class LiteNetSetMessageMenu
+    public static void Menu(LiteNet2Commands command)
     {
-        public static void Menu(LiteNet2Commands command)
+        while (true)
         {
-            while (true)
-            {
-                Console.WriteLine("");
-                Console.WriteLine($"{command.Humanize(LetterCasing.Title)}:");
-                Console.WriteLine($"     Type the new {command.Humanize(LetterCasing.LowerCase)} (16 characters)");
-                Console.WriteLine($" ENTER - Return");
+            Console.WriteLine("");
+            Console.WriteLine($"{command.Humanize(LetterCasing.Title)}:");
+            Console.WriteLine($"     Type the new {command.Humanize(LetterCasing.LowerCase)} (16 characters)");
+            Console.WriteLine($" ENTER - Return");
 
-                var option = Console.ReadLine();
+            var option = Console.ReadLine();
 
-                if (string.IsNullOrEmpty(option)) return;
+            if (string.IsNullOrEmpty(option)) return;
 
-                option = Toletus.Pack.Core.Extensions.StringExtensions.Truncate(option, 16);
+            option = Toletus.Pack.Core.Extensions.StringExtensions.Truncate(option, 16);
 
-                MainMenu.LiteNet2.Send(command, Encoding.ASCII.GetBytes(option));
+            MainMenu.LiteNet2.Send(command, Encoding.ASCII.GetBytes(option));
 
-                Console.WriteLine($"The message was setted");
-            }
+            Console.WriteLine($"The message was setted");
         }
     }
 }

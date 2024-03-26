@@ -2,28 +2,27 @@
 using Humanizer;
 using Toletus.LiteNet2.Command.Enums;
 
-namespace FullConsoleAppExample.LiteNet
+namespace FullConsoleAppExample.LiteNet;
+
+internal class LiteNetSetBoolMenu
 {
-    internal class LiteNetSetBoolMenu
+    public static void Menu(LiteNet2Commands command)
     {
-        public static void Menu(LiteNet2Commands command)
+        while (true)
         {
-            while (true)
-            {
-                Console.WriteLine("");
-                Console.WriteLine($"{command.Humanize(LetterCasing.Title)}:");
-                Console.WriteLine($"     0 - False");
-                Console.WriteLine($"     1 - True");
-                Console.WriteLine($" ENTER - Return");
+            Console.WriteLine("");
+            Console.WriteLine($"{command.Humanize(LetterCasing.Title)}:");
+            Console.WriteLine($"     0 - False");
+            Console.WriteLine($"     1 - True");
+            Console.WriteLine($" ENTER - Return");
 
-                var option = Console.ReadLine();
+            var option = Console.ReadLine();
 
-                if (string.IsNullOrEmpty(option) || "01".IndexOf(option, StringComparison.Ordinal) < 0) return;
+            if (string.IsNullOrEmpty(option) || "01".IndexOf(option, StringComparison.Ordinal) < 0) return;
 
-                MainMenu.LiteNet2.Send(command, int.Parse(option));
+            MainMenu.LiteNet2.Send(command, int.Parse(option));
 
-                Console.WriteLine($"The {command.Humanize(LetterCasing.LowerCase)} was setted as {int.Parse(option) == 1}");
-            }
+            Console.WriteLine($"The {command.Humanize(LetterCasing.LowerCase)} was setted as {int.Parse(option) == 1}");
         }
     }
 }
