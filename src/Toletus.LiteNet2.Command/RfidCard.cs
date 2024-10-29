@@ -5,7 +5,7 @@ public class RfidCard
     public RfidCard(int value)
     {
         var rawWeigandHex = value.ToString("X");
-        var facilityCodeHex = rawWeigandHex.Substring(rawWeigandHex.Length - 6, 2);
+        var facilityCodeHex = rawWeigandHex.Substring(rawWeigandHex.Length - 5, 2);
         var cardNumberHex = rawWeigandHex.Substring(rawWeigandHex.Length - 4);
 
         RawWeigand = value;
