@@ -55,7 +55,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
         FingerprintReader?.Close();
     }
 
-    public static LiteNet2Board CopyToLiteNet2(LiteNet2BoardBase liteNet2BoardBase)
+    public static LiteNet2Board CreateFromBase(LiteNet2BoardBase liteNet2BoardBase)
     {
         return new LiteNet2Board(liteNet2BoardBase.Ip, liteNet2BoardBase.Id);
     }
