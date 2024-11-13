@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<VersionPrefix>1.0.0</VersionPrefix>
 		<AssemblyName>Toletus.LiteNet2.Base</AssemblyName>
 		<PackageId>Toletus.LiteNet2.Base</PackageId>
