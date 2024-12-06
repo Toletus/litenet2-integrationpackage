@@ -17,6 +17,11 @@ public partial class LiteNet2Board
     {
         Send(LiteNet2Commands.ReleaseExit, message.RemoveDiacritics());
     }
+    
+    public void ReleaseEntryAndExit(string message)
+    {
+        Send(LiteNet2Commands.ReleaseEntryAndExit, message.RemoveDiacritics());
+    }
 
     public void SetEntryClockwise(bool entryClockwise)
     {
@@ -43,10 +48,42 @@ public partial class LiteNet2Board
         Send(LiteNet2Commands.GetMac);
     }
 
+    public void Notify()
+    {
+        Send(LiteNet2Commands.Notify);
+    }
+    
+    public void TempMessage(string message)
+    {
+        Send(LiteNet2Commands.TempMessage, message);
+    }
+
+    public void ResetPeripherals()
+    {
+        Send(LiteNet2Commands.ResetPeripherals);
+    }
+
+    public void GetCounters()
+    {
+        Send(LiteNet2Commands.GetCounters);
+    }
+
     public void SetId(int id)
     {
         Id = id;
         Send(LiteNet2Commands.SetId, id);
+    }
+
+    public void SetIp(int ip)
+    {
+        Id = ip;
+        Send(LiteNet2Commands.SetIp, ip);
+    }
+
+    public void SetMac(int mac)
+    {
+        Id = mac;
+        Send(LiteNet2Commands.SetMac, mac);
     }
 
     public void SetFingerprintIdentificationMode(FingerprintIdentificationMode fingerprintIdentificationMode)

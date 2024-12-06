@@ -5,9 +5,9 @@ public enum LiteNet2Commands
     ReleaseEntry = 0x0001,
     ReleaseExit = 0x0002,
     Reset = 0x0003,
-    novoTempMessage = 0x0004,
-    novoNotify = 0x0005,
-    novoReleaseEntryAndExit = 0x0006,
+    TempMessage = 0x0004,
+    Notify = 0x0005,
+    ReleaseEntryAndExit = 0x0006,
     ResetPeripherals = 0x0007,
     ResetCounters = 0x0210,
 
