@@ -17,7 +17,7 @@ public partial class LiteNet2Board
     {
         Send(LiteNet2Commands.ReleaseExit, message.RemoveDiacritics());
     }
-    
+
     public void ReleaseEntryAndExit(string message)
     {
         Send(LiteNet2Commands.ReleaseEntryAndExit, message.RemoveDiacritics());
@@ -52,7 +52,7 @@ public partial class LiteNet2Board
     {
         Send(LiteNet2Commands.Notify);
     }
-    
+
     public void TempMessage(string message)
     {
         Send(LiteNet2Commands.TempMessage, message);
@@ -74,15 +74,17 @@ public partial class LiteNet2Board
         Send(LiteNet2Commands.SetId, id);
     }
 
-    public void SetIp(int ip)
+    public void SetIp(string ip)
     {
-        Id = ip;
+        if (!IPAddress.TryParse(ip, out var address)) return;
+
+        Ip = address;
         Send(LiteNet2Commands.SetIp, ip);
     }
 
-    public void SetMac(int mac)
+    public void SetMac(string mac)
     {
-        Id = mac;
+        Mac = mac;
         Send(LiteNet2Commands.SetMac, mac);
     }
 
