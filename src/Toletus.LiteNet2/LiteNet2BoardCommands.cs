@@ -48,9 +48,9 @@ public partial class LiteNet2Board
         Send(LiteNet2Commands.GetMac);
     }
 
-    public void Notify()
+    public void Notify( byte[] parameter)
     {
-        Send(LiteNet2Commands.Notify);
+        Send(LiteNet2Commands.Notify, parameter);
     }
 
     public void TempMessage(string message)
