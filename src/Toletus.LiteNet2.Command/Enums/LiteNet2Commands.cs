@@ -22,7 +22,7 @@ public enum LiteNet2Commands
     GetBuzzerMute = 0x0109,
     GetFingerprintIdentificationMode = 0x010e,
     GetShowCounters = 0x0108,
-    GetCounters,
+    GetCounters = 0x0110,
     GetReleaseDuration = 0x010a,
     GetMenuPassword = 0x010b,
     GetFirmwareVersion = 0x010c,
