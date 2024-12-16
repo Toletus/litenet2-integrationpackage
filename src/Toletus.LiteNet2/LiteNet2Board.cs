@@ -40,7 +40,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     {
         if (boardConnectionStatus == BoardConnectionStatus.Connected)
         {
-            OnReady?.Invoke(CreateFromBase(liteNet2BoardBase),"LiteNet2 Ok");
+            OnReady?.Invoke(this,"LiteNet2 Ok");
             Log?.Invoke($"{liteNet2BoardBase} {boardConnectionStatus}");
             Send(LiteNet2Commands.GetFlowControlExtended);
 
