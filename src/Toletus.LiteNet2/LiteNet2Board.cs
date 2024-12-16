@@ -13,7 +13,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     public delegate void GyreHandler(LiteNet2Board liteNet2Board, Direction direction);
     public delegate void ResponseHandler(LiteNet2Board liteNet2Board, LiteNet2Response liteNet2Response);
     public delegate void SendHandler(LiteNet2Board liteNet2Board, LiteNet2Send liteNet2Send);
-    public delegate void ReadyHandler(LiteNet2Board liteNet2Board, string message);
+    public delegate void ReadyHandler(LiteNet2Board liteNet2Board, bool isReady);
     public delegate void FingerprintReaderConnectedHandler(LiteNet2Board liteNet2Board, bool connected);
 
     public event FingerprintReaderConnectedHandler? OnFingerprintReaderConnected;
@@ -40,7 +40,7 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     {
         if (boardConnectionStatus == BoardConnectionStatus.Connected)
         {
-            OnReady?.Invoke(this,"LiteNet2 Ok");
+            OnReady?.Invoke(this, true);
             Log?.Invoke($"{liteNet2BoardBase} {boardConnectionStatus}");
             Send(LiteNet2Commands.GetFlowControlExtended);
 
