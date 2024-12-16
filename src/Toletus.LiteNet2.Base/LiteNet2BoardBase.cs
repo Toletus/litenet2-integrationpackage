@@ -29,10 +29,12 @@ public class LiteNet2BoardBase
 
     public delegate void IdentificationHandler(LiteNet2BoardBase liteNet2Board, Identification identification);
 
+    public delegate void StatusHandler(LiteNet2BoardBase liteNet2Board, string status);
+
     public event Action<LiteNet2Response>? OnResponse;
     public event IdentificationHandler? OnIdentification;
     public event Action<LiteNet2BoardBase, BoardConnectionStatus>? OnConnectionStatusChanged;
-    public event Action<string>? OnStatus;
+    public event StatusHandler? OnStatus;
     public event Action<LiteNet2BoardBase, LiteNet2Send>? OnSend;
 
     private TcpClient? _tcpClient;
@@ -252,7 +254,7 @@ public class LiteNet2BoardBase
             {
                 if (_reconnecting) return;
 
-                OnStatus?.Invoke("Reconnecting");
+                OnStatus?.Invoke(this, "Reconnecting");
 
                 while (!Connected)
                 {
@@ -273,5 +275,5 @@ public class LiteNet2BoardBase
         });
     }
 
-    protected void EventStatus(string status) => OnStatus?.Invoke(status);
+    protected void EventStatus(string status) => OnStatus?.Invoke(this, status);
 }
