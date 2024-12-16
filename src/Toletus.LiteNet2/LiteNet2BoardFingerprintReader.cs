@@ -48,7 +48,7 @@ public partial class LiteNet2Board
             if (FingerprintReader != null)
                 FingerprintReader.OnConnectionStateChanged -= FingerprintReaderConnectionStateChanged;
             
-            OnFingerprintReaderConnected?.Invoke(HasFingerprintReader);
+            OnFingerprintReaderConnected?.Invoke(this, HasFingerprintReader);
         }
     }
 }
