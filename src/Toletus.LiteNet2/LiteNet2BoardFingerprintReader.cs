@@ -31,12 +31,12 @@ public partial class LiteNet2Board
             if (!HasFingerprintReader && connectionStatus == SM25ConnectionStatus.Connected)
                 HasFingerprintReader = true;
 
-            //var ret = FingerprintReader.Sync.TestConnection();
+            var ret = FingerprintReader.Sync.TestConnection();
                 
-            //HasFingerprintReader = (ret != null && ret.ReturnCode != ReturnCodes.ERR_UNDEFINED);
+            HasFingerprintReader = (ret != null && ret.ReturnCode != ReturnCodes.ERR_UNDEFINED);
 
-            //if (HasFingerprintReader) FingerprintReader.Sync.SetFingerTimeOut(60);
-            //FingerprintReader.Close();
+            if (HasFingerprintReader) FingerprintReader.Sync.SetFingerTimeOut(60);
+            FingerprintReader.Close();
         }
         catch (Exception ex)
         {
