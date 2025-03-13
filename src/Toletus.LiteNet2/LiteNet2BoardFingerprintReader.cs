@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Toletus.SM25;
+using Toletus.SM25.Base;
 using Toletus.SM25.Command.Enums;
 
 namespace Toletus.LiteNet2;
@@ -32,11 +33,15 @@ public partial class LiteNet2Board
                 HasFingerprintReader = true;
 
             var ret = FingerprintReader.Sync.TestConnection();
-                
+
             HasFingerprintReader = (ret != null && ret.ReturnCode != ReturnCodes.ERR_UNDEFINED);
 
             if (HasFingerprintReader) FingerprintReader.Sync.SetFingerTimeOut(60);
             FingerprintReader.Close();
+        }
+        catch (FingerprintConnectionException ex)
+        {
+            HasFingerprintReader = false;
         }
         catch (Exception ex)
         {
