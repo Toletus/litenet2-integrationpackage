@@ -42,6 +42,7 @@ public partial class LiteNet2Board
         catch (FingerprintConnectionException ex)
         {
             HasFingerprintReader = false;
+            Log?.Invoke($"Fingerprint connection exception: " + ex.Message);
         }
         catch (Exception ex)
         {
