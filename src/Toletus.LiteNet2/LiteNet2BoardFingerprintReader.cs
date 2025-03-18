@@ -18,8 +18,6 @@ public partial class LiteNet2Board
         FingerprintReader = new SM25Reader(Ip);
         FingerprintReader.OnConnectionStateChanged += FingerprintReaderConnectionStateChanged;
 
-        FingerprintReader.TestFingerprintReaderConnection();
-
         return FingerprintReader;
     }
 
