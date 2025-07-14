@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Toletus.Pack.Core" Version="8.2.1" />
+    <PackageReference Include="Toletus.Pack.Core" Version="8.7.1" />
   </ItemGroup>
 
 </Project>

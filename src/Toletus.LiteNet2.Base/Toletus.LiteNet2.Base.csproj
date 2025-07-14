@@ -41,7 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Toletus.Pack.Core" Version="8.2.1" />
+	  <PackageReference Include="Toletus.Pack.Core" Version="8.7.1" />
 	</ItemGroup>
 
 	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
