@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Toletus.Pack.Core.Network.Utils;
 using Toletus.Pack.Core.Utils;
 
 namespace Toletus.LiteNet2.Base.Utils;

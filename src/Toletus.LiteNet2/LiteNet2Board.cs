@@ -6,6 +6,7 @@ using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.LiteNet2.Enums;
 using Toletus.Pack.Core;
+using Toletus.Pack.Core.Network;
 
 namespace Toletus.LiteNet2;
 

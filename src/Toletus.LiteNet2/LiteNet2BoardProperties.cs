@@ -1,5 +1,6 @@
 ﻿using Toletus.LiteNet2.Command.Enums;
 using Toletus.Pack.Core;
+using Toletus.Pack.Core.Network;
 using Toletus.SM25;
 
 namespace Toletus.LiteNet2;

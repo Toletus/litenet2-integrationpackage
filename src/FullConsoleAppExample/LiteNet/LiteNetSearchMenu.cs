@@ -3,6 +3,7 @@ using System.Net;
 using ConsoleTools;
 using Toletus.LiteNet2.Base;
 using Toletus.LiteNet2.Base.Utils;
+using Toletus.Pack.Core.Network.Utils;
 using Toletus.Pack.Core.Utils;
 
 namespace FullConsoleAppExample.LiteNet;
