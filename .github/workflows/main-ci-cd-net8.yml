@@ -26,19 +26,19 @@ jobs:
           github_ref: ${{ github.ref }}
         run: |
           version='8.${{ github.run_number }}.${{ github.run_attempt }}'
-          echo version=$version
-          echo "version=$version" >> $GITHUB_ENV
+           echo version=$version
+           echo "version=$version" >> $GITHUB_ENV
 
       - name: Build with dotnet
         run: |
-          dotnet build "src/Toletus.LiteNet2/Toletus.LiteNet2.csproj" --configuration Release -p:Version=${{ env.version }} -p:PackageId=Toletus.LiteNet2.V2
-          dotnet build "src/Toletus.LiteNet2.Base/Toletus.LiteNet2.Base.csproj" --configuration Release -p:Version=${{ env.version }} -p:PackageId=Toletus.LiteNet2.Base.V2
-          dotnet build "src/Toletus.LiteNet2.Command/Toletus.LiteNet2.Command.csproj" --configuration Release -p:Version=${{ env.version }} -p:PackageId=Toletus.LiteNet2.Command.V2
+          dotnet build "src/Toletus.LiteNet2/Toletus.LiteNet2.csproj" --configuration Release -p:Version=${{ env.version }}
+          dotnet build "src/Toletus.LiteNet2.Base/Toletus.LiteNet2.Base.csproj" --configuration Release -p:Version=${{ env.version }}
+          dotnet build "src/Toletus.LiteNet2.Command/Toletus.LiteNet2.Command.csproj" --configuration Release -p:Version=${{ env.version }}
 
       - name: Create the Package
         run: |
-          dotnet pack "src/Toletus.LiteNet2/Toletus.LiteNet2.csproj" --configuration Release /p:PackageVersion=${{ env.version }} /p:PackageId=Toletus.LiteNet2.V2
+          dotnet pack "src/Toletus.LiteNet2/Toletus.LiteNet2.csproj" --configuration Release /p:PackageVersion=${{ env.version }}  #-beta
 
       - name: Publish Toletus.LiteNet2 on Nuget
         run: |
-          dotnet nuget push "src/Toletus.LiteNet2/bin/Release/*.nupkg" -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          dotnet nuget push "src/Toletus.LiteNet2/bin/Release/*.nupkg" -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}

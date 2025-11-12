@@ -32,7 +32,6 @@
 
 		<RepositoryUrl>https://github.com/Toletus/LiteNet2Board-Package.git</RepositoryUrl>
 		<PackageVersion>$(PackageVersion)</PackageVersion>
-		<PackageId>Toletus.LiteNet2.Base.V2</PackageId>
 
 	</PropertyGroup>
 
