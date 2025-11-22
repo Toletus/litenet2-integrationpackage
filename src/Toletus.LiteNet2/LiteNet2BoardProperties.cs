@@ -16,7 +16,6 @@ public partial class LiteNet2Board
     public string? MenuPassword { get; set; }
     public int? ReleaseDuration { get; set; }
     public bool? ShowCounters { get; set; }
-    public string? SerialNumber { get; set; }
     public string? MessageLine2 { get; set; }
     public string? MessageLine1 { get; set; }
     public bool? EntryClockwise { get; set; }

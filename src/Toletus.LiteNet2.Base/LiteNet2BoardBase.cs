@@ -20,6 +20,7 @@ public class LiteNet2BoardBase
     public IPAddress Ip { get; set; }
     public IPAddress? NetworkIp { get; set; }
     public int Id { get; set; }
+    public string? SerialNumber { get; set; }
     public string ConnectionInfo { get; set; }
 
     public bool InUse => Connected
@@ -276,4 +277,44 @@ public class LiteNet2BoardBase
     }
 
     protected void EventStatus(string status) => OnStatus?.Invoke(this, status);
+
+    public async Task FetchAndSetSerialNumberAsync()
+    {
+        try
+        {
+            using var tcpClient = new TcpClient();
+            await tcpClient.ConnectAsync(Ip, Port).ConfigureAwait(false);
+
+            var stream = tcpClient.GetStream();
+            var request = new LiteNet2Send(LiteNet2Commands.GetSerialNumber);
+
+            await stream.WriteAsync(request.Payload, 0, request.Payload.Length).ConfigureAwait(false);
+
+            var buffer = new byte[20];
+            var bytesRead = 0;
+
+            while (bytesRead < buffer.Length)
+            {
+                var read = await stream.ReadAsync(buffer, bytesRead, buffer.Length - bytesRead)
+                    .ConfigureAwait(false);
+
+                if (read == 0)
+                    break;
+
+                bytesRead += read;
+            }
+
+            if (bytesRead == buffer.Length)
+            {
+                var response = new LiteNet2Response(buffer);
+
+                if (response.Command == LiteNet2Commands.GetSerialNumber)
+                    SerialNumber = BitConverter.ToInt32(response.RawData, 0).ToString();
+            }
+        }
+        catch (Exception e)
+        {
+            Log?.Invoke($"FetchAndSetSerialNumberAsync failed {e.Message}");
+        }
+    }
 }
