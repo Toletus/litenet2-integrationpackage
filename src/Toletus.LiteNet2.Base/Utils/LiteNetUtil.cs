@@ -69,7 +69,10 @@ public abstract class LiteNetUtil
         if (!(start < 0))
             connectionInfo = device.Substring(start + 1).Trim();
 
-        var liteNet = new LiteNet2BoardBase(response.Result.RemoteEndPoint.Address, id, connectionInfo);
+        var liteNet = new LiteNet2BoardBase(
+            ip: response.Result.RemoteEndPoint.Address, 
+            id: id,
+            connectionInfo: connectionInfo);
 
         await liteNet.FetchAndSetSerialNumberAsync().ConfigureAwait(false);
 

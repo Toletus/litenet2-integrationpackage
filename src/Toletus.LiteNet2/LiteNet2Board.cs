@@ -13,9 +13,13 @@ namespace Toletus.LiteNet2;
 public partial class LiteNet2Board : LiteNet2BoardBase
 {
     public delegate void GyreHandler(LiteNet2Board liteNet2Board, Direction direction);
+
     public delegate void ResponseHandler(LiteNet2Board liteNet2Board, LiteNet2Response liteNet2Response);
+
     public delegate void SendHandler(LiteNet2Board liteNet2Board, LiteNet2Send liteNet2Send);
+
     public delegate void ReadyHandler(LiteNet2Board liteNet2Board, bool isReady);
+
     public delegate void FingerprintReaderConnectedHandler(LiteNet2Board liteNet2Board, bool connected);
 
     public event FingerprintReaderConnectedHandler? OnFingerprintReaderConnected;
@@ -24,7 +28,8 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     public new event SendHandler? OnSend;
     public new event ResponseHandler? OnResponse;
 
-    public LiteNet2Board(IPAddress ip, int id, string connectionInfo = "") : base(ip, id, connectionInfo)
+    public LiteNet2Board(IPAddress ip, string serialNumber, int id, string connectionInfo = "") 
+        : base(ip, serialNumber, id, connectionInfo)
     {
         IpConfig = new IpConfig();
         OnConnectionStatusChanged += LiteNetOnConnectionStatusChanged;
@@ -38,7 +43,8 @@ public partial class LiteNet2Board : LiteNet2BoardBase
         OnSend?.Invoke(this, liteNet2Send);
     }
 
-    private void LiteNetOnConnectionStatusChanged(LiteNet2BoardBase liteNet2BoardBase, BoardConnectionStatus boardConnectionStatus)
+    private void LiteNetOnConnectionStatusChanged(LiteNet2BoardBase liteNet2BoardBase,
+        BoardConnectionStatus boardConnectionStatus)
     {
         if (boardConnectionStatus == BoardConnectionStatus.Connected)
         {
@@ -61,10 +67,14 @@ public partial class LiteNet2Board : LiteNet2BoardBase
 
     public static LiteNet2Board CreateFromBase(LiteNet2BoardBase liteNet2BoardBase)
     {
-        return new LiteNet2Board(liteNet2BoardBase.Ip, liteNet2BoardBase.Id);
+        return new LiteNet2Board(
+            liteNet2BoardBase.Ip,
+            liteNet2BoardBase.SerialNumber,
+            liteNet2BoardBase.Id);
     }
 
-    public override string ToString() => $"{base.ToString()}" + (HasFingerprintReader ? " Bio" : "") + $" {Description}";
+    public override string ToString() =>
+        $"{base.ToString()}" + (HasFingerprintReader ? " Bio" : "") + $" {Description}";
 
     public void WaitForFingerprintReader()
     {

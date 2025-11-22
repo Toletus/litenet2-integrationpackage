@@ -42,9 +42,10 @@ public class LiteNet2BoardBase
 
     public bool Connected => _tcpClient?.Client != null && _tcpClient.Connected;
 
-    public LiteNet2BoardBase(IPAddress ip, int? id = null, string connectionInfo = "")
+    public LiteNet2BoardBase(IPAddress ip, string? serialNumber = null, int? id = null, string connectionInfo = "")
     {
         Ip = ip;
+        SerialNumber = serialNumber;
         if (id.HasValue) Id = id.Value;
         ConnectionInfo = connectionInfo == "None" ? "Disconnected" : connectionInfo;
     }

@@ -34,7 +34,7 @@ internal static class MainMenu
 
         LiteNet2.Connect();
 
-        Console.WriteLine("Connected!");
+        Console.WriteLine($"Connected! Serial number: {LiteNet2.SerialNumber}");
 
         var exit = false;
         while (!exit)
@@ -62,7 +62,7 @@ internal static class MainMenu
 
     private static void LiteNet2_OnResponse(LiteNet2Response responseCommand)
     {
-        Console.WriteLine($"{Environment.NewLine}LiteNet2 Response: {responseCommand}]");
+        Console.WriteLine($"Serial number:{LiteNet2.SerialNumber} - {Environment.NewLine}LiteNet2 Response: {responseCommand}]");
 
         if (responseCommand.Identification != null)
             Console.WriteLine(
