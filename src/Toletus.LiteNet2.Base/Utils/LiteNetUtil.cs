@@ -38,11 +38,11 @@ public abstract class LiteNetUtil
         return _liteNets;
     }
 
-    public static LiteNet2BoardBase? Search(string networkInterfaceName, int? id)
+    public static LiteNet2BoardBase? Search(string networkInterfaceName, string serialNumber)
     {
         var liteNets = Search(networkInterfaceName);
 
-        return liteNets?.FirstOrDefault(c => id == null || c.Id == id);
+        return liteNets?.FirstOrDefault(c => c.SerialNumber == serialNumber);
     }
 
     public static List<LiteNet2BoardBase>? Search(string networkInterfaceName)

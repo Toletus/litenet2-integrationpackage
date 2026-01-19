@@ -4,15 +4,20 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Toletus.LiteNet2.Base.Utils;
 using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.Pack.Core.Extensions;
+using Toletus.Pack.Core.Network.Utils;
 
 namespace Toletus.LiteNet2.Base;
 
 public class LiteNet2BoardBase
 {
+    private HealthCheck _healthCheck;
+
     public static Action<string>? Log;
 
     public const int Port = 7878;
@@ -48,6 +53,7 @@ public class LiteNet2BoardBase
         SerialNumber = serialNumber;
         if (id.HasValue) Id = id.Value;
         ConnectionInfo = connectionInfo == "None" ? "Disconnected" : connectionInfo;
+        _healthCheck = new HealthCheck(this);
     }
 
     public override string ToString() => $"LiteNet2 #{Id} {Ip}:{Port} {ConnectionInfo}";
@@ -73,7 +79,7 @@ public class LiteNet2BoardBase
         }
     }
 
-    private void CheckConnection()
+    public void CheckConnection()
     {
         Send(LiteNet2Commands.GetId);
     }
@@ -246,33 +252,45 @@ public class LiteNet2BoardBase
         }
     }
 
-    private bool _reconnecting;
+    private int _reconnecting;
 
-    private void TryReconnect()
+    public void TryReconnect()
     {
         Task.Run(async () =>
         {
+            if (Interlocked.Exchange(ref _reconnecting, 1) == 1) return;
+
             try
             {
-                if (_reconnecting) return;
-
+                var delayMs = 200;
                 OnStatus?.Invoke(this, "Reconnecting");
 
                 while (!Connected)
                 {
-                    _reconnecting = true;
-                    await Task.Delay(200);
-                    Connect();
+                    try
+                    {
+                        Connect();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log?.Invoke($"Reconnect failed: {ex.Message}");
+                    }
+
+                    if (Connected) continue;
+                    
+                    var networkName = NetworkInterfaceUtils.GetDefaultNetworkInterface()?.Name;
+                    var board = LiteNetUtil.Search(networkName, SerialNumber);
+                        
+                    Ip = board?.Ip ?? Ip;
+                        
+                    await Task.Delay(delayMs).ConfigureAwait(false);
+                    if (delayMs < 5000)
+                        delayMs = Math.Min(delayMs * 2, 5000);
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
             }
             finally
             {
-                _reconnecting = false;
+                Interlocked.Exchange(ref _reconnecting, 0);
             }
         });
     }
