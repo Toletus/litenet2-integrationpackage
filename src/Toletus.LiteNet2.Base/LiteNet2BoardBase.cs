@@ -16,8 +16,6 @@ namespace Toletus.LiteNet2.Base;
 
 public class LiteNet2BoardBase
 {
-    private HealthCheck _healthCheck;
-
     public static Action<string>? Log;
 
     public const int Port = 7878;
@@ -53,7 +51,6 @@ public class LiteNet2BoardBase
         SerialNumber = serialNumber;
         if (id.HasValue) Id = id.Value;
         ConnectionInfo = connectionInfo == "None" ? "Disconnected" : connectionInfo;
-        _healthCheck = new HealthCheck(this);
     }
 
     public override string ToString() => $"LiteNet2 #{Id} {Ip}:{Port} {ConnectionInfo}";
@@ -68,6 +65,7 @@ public class LiteNet2BoardBase
             _ = Response();
 
             OnConnectionStatusChanged?.Invoke(this, BoardConnectionStatus.Connected);
+            _ = new HealthCheck(this);
         }
         catch (SocketException)
         {
