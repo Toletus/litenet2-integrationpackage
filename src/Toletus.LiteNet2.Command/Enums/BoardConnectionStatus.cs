@@ -3,5 +3,6 @@
 public enum BoardConnectionStatus
 {
     Connected,
-    Closed
+    Closed,
+    Failed
 }

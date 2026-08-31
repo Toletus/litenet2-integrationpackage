@@ -44,19 +44,19 @@ public partial class LiteNet2Board : LiteNet2BoardBase
     }
 
     private void LiteNetOnConnectionStatusChanged(LiteNet2BoardBase liteNet2BoardBase,
-        BoardConnectionStatus boardConnectionStatus)
+        ConnectionStateChange change)
     {
-        if (boardConnectionStatus == BoardConnectionStatus.Connected)
+        if (change.Status == BoardConnectionStatus.Connected)
         {
             OnReady?.Invoke(this, true);
-            Log?.Invoke($"{liteNet2BoardBase} {boardConnectionStatus}");
+            Log?.Invoke($"{liteNet2BoardBase} {change}");
             Send(LiteNet2Commands.GetFlowControlExtended);
 
             if (FingerprintReader == null)
                 CreateFingerprintReaderAndTest();
         }
         else
-            EventStatus(boardConnectionStatus.ToString());
+            EventStatus(change.ToString());
     }
 
     public new void Close()

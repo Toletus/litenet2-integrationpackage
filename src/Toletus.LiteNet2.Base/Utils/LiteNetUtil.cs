@@ -1,41 +1,45 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Toletus.Pack.Core.Network.Utils;
-using Toletus.Pack.Core.Utils;
 
 namespace Toletus.LiteNet2.Base.Utils;
 
 public abstract class LiteNetUtil
 {
-    const string ToletusLiteNet2 = "TOLETUS LiteNet2";
-    private static List<LiteNet2BoardBase> _liteNets = new();
-    private static readonly ManualResetEventSlim _udpResponseEvent = new(false);
+    /// <summary>Janela padrão de coleta da varredura. Calibrável em bancada (T-061).</summary>
+    public static TimeSpan DefaultScanWindow { get; set; } = TimeSpan.FromSeconds(5);
+
+    // Fan-out de respostas UDP para todas as sessões ativas — cada sessão coleta
+    // de forma independente (AC-003.3). Sem estado estático compartilhado de resultado.
+    private static readonly object _sessionsLock = new();
+    private static readonly List<LiteNetScanSession> _activeSessions = new();
 
     static LiteNetUtil()
     {
         UdpUtils.OnUdpResponse += OnUdpResponse;
     }
 
-    public static List<LiteNet2BoardBase>? Search(IPAddress networkIpAddress)
+    public static List<LiteNet2BoardBase>? Search(IPAddress networkIpAddress,
+        IEnumerable<IPAddress>? exclusions = null, TimeSpan? window = null)
     {
-        _liteNets.Clear();
-        _udpResponseEvent.Reset();
+        var session = new LiteNetScanSession(window ?? DefaultScanWindow, exclusions);
 
-        UdpUtils.Send(networkIpAddress, 7878, "prc");
+        lock (_sessionsLock) _activeSessions.Add(session);
+        try
+        {
+            UdpUtils.Send(networkIpAddress, 7878, "prc");
+            session.WaitWindow();
+        }
+        finally
+        {
+            lock (_sessionsLock) _activeSessions.Remove(session);
+        }
 
-        WaitForUdpResponses();
-
-        foreach (var liteNet in _liteNets)
-            liteNet.NetworkIp = networkIpAddress;
-
-        return _liteNets;
+        return session.Resolve(networkIpAddress);
     }
 
     public static LiteNet2BoardBase? Search(string networkInterfaceName, string serialNumber)
@@ -45,46 +49,36 @@ public abstract class LiteNetUtil
         return liteNets?.FirstOrDefault(c => c.SerialNumber == serialNumber);
     }
 
-    public static List<LiteNet2BoardBase>? Search(string networkInterfaceName)
+    public static List<LiteNet2BoardBase>? Search(string networkInterfaceName,
+        IEnumerable<IPAddress>? exclusions = null)
     {
         var ip = NetworkInterfaceUtils.GetNetworkInterfaceIpAddressByName(networkInterfaceName);
 
-        return ip == null ? null : Search(ip);
+        return ip == null ? null : Search(ip, exclusions);
     }
 
-    private static async void OnUdpResponse(UdpClient udpClient, Task<UdpReceiveResult> response)
+    private static void OnUdpResponse(UdpClient udpClient, Task<UdpReceiveResult> response)
     {
-        var device = Encoding.ASCII.GetString(response.Result.Buffer);
+        LiteNetScanSession[] sessions;
+        lock (_sessionsLock) sessions = _activeSessions.ToArray();
 
-        if (!device.Contains(ToletusLiteNet2))
+        if (sessions.Length == 0)
             return;
 
-        var m = Regex.Match(device, @"@(\d+)");
-        var id = (UInt16)Convert.ToInt16(m.Groups[1].Value);
-        
-        var connectionInfo = string.Empty;
-
-        var start = device.IndexOf('=');
-        
-        if (!(start < 0))
-            connectionInfo = device.Substring(start + 1).Trim();
-
-        var liteNet = new LiteNet2BoardBase(
-            ip: response.Result.RemoteEndPoint.Address, 
-            id: id,
-            connectionInfo: connectionInfo);
-
-        await liteNet.FetchAndSetSerialNumberAsync().ConfigureAwait(false);
-
-        _liteNets.Add(liteNet);
-        _udpResponseEvent.Set();
-    }
-
-    private static void WaitForUdpResponses()
-    {
-        var timeout = TimeSpan.FromSeconds(5);
-
-        if (!_udpResponseEvent.Wait(timeout))
+        byte[] buffer;
+        IPAddress address;
+        try
+        {
+            buffer = response.Result.Buffer;
+            address = response.Result.RemoteEndPoint.Address;
+        }
+        catch (Exception e)
+        {
+            LiteNet2BoardBase.Log?.Invoke($"Scan: UDP receive error discarded: {e.Message}");
             return;
+        }
+
+        foreach (var session in sessions)
+            session.Offer(buffer, address);
     }
 }
