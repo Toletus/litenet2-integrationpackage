@@ -3,6 +3,7 @@ using ConsoleTools;
 using FullConsoleAppExample.FingerprintReader;
 using FullConsoleAppExample.LiteNet;
 using Humanizer;
+using Toletus.LiteNet2;
 using Toletus.LiteNet2.Base;
 using Toletus.LiteNet2.Command;
 
@@ -10,12 +11,12 @@ namespace FullConsoleAppExample;
 
 internal static class MainMenu
 {
-    internal static LiteNet2BoardBase LiteNet2;
+    internal static LiteNet2Board LiteNet2;
 
-    public static void SetLiteNet2(LiteNet2BoardBase liteNet)
+    public static void SetLiteNet2(LiteNet2Board liteNet)
     {
         LiteNet2 = liteNet;
-        LiteNet2.OnResponse += LiteNet2_OnResponse;
+        // LiteNet2.OnResponse += LiteNet2_OnResponse;
 
         //LiteNet2.Connect();
 
@@ -60,12 +61,12 @@ internal static class MainMenu
         }
     }
 
-    private static void LiteNet2_OnResponse(LiteNet2Response responseCommand)
-    {
-        Console.WriteLine($"Serial number:{LiteNet2.SerialNumber} - {Environment.NewLine}LiteNet2 Response: {responseCommand}]");
-
-        if (responseCommand.Identification != null)
-            Console.WriteLine(
-                $"{Environment.NewLine}LiteNet2 Identification: {responseCommand.Identification} {responseCommand.Identification.EmbededTemplate}");
-    }
+    // private static void LiteNet2_OnResponse(LiteNet2Board.ResponseHandler responseCommand)
+    // {
+    //     Console.WriteLine($"Serial number:{LiteNet2.SerialNumber} - {Environment.NewLine}LiteNet2 Response: {responseCommand}]");
+    //
+    //     if (responseCommand.Identification != null)
+    //         Console.WriteLine(
+    //             $"{Environment.NewLine}LiteNet2 Identification: {responseCommand.Identification} {responseCommand.Identification.EmbededTemplate}");
+    // }
 }

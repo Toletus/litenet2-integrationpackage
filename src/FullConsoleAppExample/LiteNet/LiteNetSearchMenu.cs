@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Net;
 using ConsoleTools;
+using Toletus.LiteNet2;
 using Toletus.LiteNet2.Base;
 using Toletus.LiteNet2.Base.Utils;
 using Toletus.Pack.Core.Network.Utils;
@@ -42,6 +43,6 @@ internal class LiteNetSearchMenu
 
     private static void SelectLiteNet(LiteNet2BoardBase liteNet)
     {
-        MainMenu.SetLiteNet2(liteNet);
+        MainMenu.SetLiteNet2(LiteNet2Board.CreateFromBase(liteNet));
     }
 }

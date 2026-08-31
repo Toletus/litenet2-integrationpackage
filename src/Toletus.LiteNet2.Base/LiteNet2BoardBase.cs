@@ -1,16 +1,14 @@
-﻿using System;
+using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using Toletus.LiteNet2.Base.Utils;
 using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.Pack.Core.Extensions;
-using Toletus.Pack.Core.Network.Utils;
 
 namespace Toletus.LiteNet2.Base;
 
@@ -19,6 +17,20 @@ public class LiteNet2BoardBase
     public static Action<string>? Log;
 
     public const int Port = 7878;
+
+    /// <summary>Porta efetiva de conexão. Default = <see cref="Port"/>; sobrescrevível em teste.</summary>
+    public int ConnectPort { get; set; } = Port;
+
+    /// <summary>Tamanho fixo do frame LiteNet2 (prefixo+comando+dados+sufixo).</summary>
+    public const int FrameSize = 20;
+
+    // Parâmetros de resiliência expostos para calibração em bancada (TDD §4.5 / risco §10).
+    // ponytail: defaults iniciais; valores finais saem do soak 24h (T-061) e entram por config no app.
+    public static TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
+    public static TimeSpan SendTimeout { get; set; } = TimeSpan.FromSeconds(5);
+    public static TimeSpan KeepAliveTime { get; set; } = TimeSpan.FromSeconds(10);
+    public static TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(5);
+    public static int KeepAliveRetryCount { get; set; } = 3;
 
     public IPAddress Ip { get; set; }
     public IPAddress? NetworkIp { get; set; }
@@ -37,11 +49,16 @@ public class LiteNet2BoardBase
 
     public event Action<LiteNet2Response>? OnResponse;
     public event IdentificationHandler? OnIdentification;
-    public event Action<LiteNet2BoardBase, BoardConnectionStatus>? OnConnectionStatusChanged;
+
+    public event Action<LiteNet2BoardBase, ConnectionStateChange>? OnConnectionStatusChanged;
     public event StatusHandler? OnStatus;
     public event Action<LiteNet2BoardBase, LiteNet2Send>? OnSend;
 
     private TcpClient? _tcpClient;
+    private SemaphoreSlim _sendLock = new(1, 1);
+    private CancellationTokenSource? _receiveCts;
+    private Channel<LiteNet2Response>? _dispatchQueue;
+    private int _closing;
 
     public bool Connected => _tcpClient?.Client != null && _tcpClient.Connected;
 
@@ -55,25 +72,64 @@ public class LiteNet2BoardBase
 
     public override string ToString() => $"LiteNet2 #{Id} {Ip}:{Port} {ConnectionInfo}";
 
-    public void Connect()
+    /// <summary>Conexão síncrona (com teto). Mantida para consumidores atuais.</summary>
+    public void Connect() => ConnectAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+    /// <summary>
+    /// Conexão assíncrona com teto próprio, keepalive de transporte e teto de envio (T-010/AC-004.1).
+    /// Não inicia recuperação autônoma — o consumidor é o único dono da reconexão (ADR-001).
+    /// </summary>
+    public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
+        var client = new TcpClient();
+        ConfigureSocket(client.Client);
+
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(ConnectTimeout);
+
         try
         {
-            _tcpClient = new TcpClient();
-            _tcpClient.Connect(Ip, Port);
-
-            _ = Response();
-
-            OnConnectionStatusChanged?.Invoke(this, BoardConnectionStatus.Connected);
-            _ = new HealthCheck(this);
+            await client.ConnectAsync(Ip, ConnectPort, timeoutCts.Token).ConfigureAwait(false);
         }
-        catch (SocketException)
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
+            client.Dispose();
+            throw new TimeoutException($"Connect to {Ip}:{Port} exceeded {ConnectTimeout}");
+        }
+        catch
+        {
+            client.Dispose();
             throw;
         }
-        catch (Exception ex)
+
+        _tcpClient = client;
+        _sendLock = new SemaphoreSlim(1, 1);
+        _closing = 0;
+        _receiveCts = new CancellationTokenSource();
+        StartDispatch(_receiveCts.Token);
+        _ = ReceiveLoopAsync(_receiveCts.Token);
+
+        RaiseStateChange(BoardConnectionStatus.Connected, ConnectionCause.None);
+    }
+
+    private static void ConfigureSocket(Socket socket)
+    {
+        socket.SendTimeout = (int)SendTimeout.TotalMilliseconds;
+
+        try
         {
-            throw;
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime,
+                (int)KeepAliveTime.TotalSeconds);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval,
+                (int)KeepAliveInterval.TotalSeconds);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount,
+                KeepAliveRetryCount);
+        }
+        catch (Exception e)
+        {
+            // ponytail: keepalive fino é best-effort por plataforma; SO_KEEPALIVE base já ativado acima quando suportado.
+            Log?.Invoke($"KeepAlive tuning unavailable: {e.Message}");
         }
     }
 
@@ -82,60 +138,127 @@ public class LiteNet2BoardBase
         Send(LiteNet2Commands.GetId);
     }
 
-    public void Close()
-    {
-        _tcpClient?.Close();
-        OnConnectionStatusChanged?.Invoke(this, BoardConnectionStatus.Closed);
-    }
+    /// <summary>Encerramento local explícito (AC-004.3: publica mudança de estado com causa).</summary>
+    public void Close() => CloseInternal(BoardConnectionStatus.Closed, ConnectionCause.LocalClose);
 
-    private async Task Response()
+    private void CloseInternal(BoardConnectionStatus status, ConnectionCause cause)
     {
-        Log?.Invoke("Response start");
+        // Um único caminho de morte publica o evento — reentrância protegida (AC-004.3).
+        if (Interlocked.Exchange(ref _closing, 1) == 1) return;
 
-        var buffer = new byte[1024];
         try
         {
-            var bytesRead = 1;
-
-            while (bytesRead != 0)
-            {
-                bytesRead = await _tcpClient!.GetStream().ReadAsync(buffer, 0, buffer.Length);
-
-                var respFull = buffer.Take(bytesRead).ToArray();
-
-                var skip = 0;
-                while (respFull.Length > skip)
-                {
-                    var resp = respFull.Skip(skip).Take(20).ToArray();
-
-                    var responseCommand = ProcessResponse(resp);
-
-                    OnResponse?.Invoke(responseCommand);
-
-                    skip += 20;
-                }
-            }
-        }
-        catch (ObjectDisposedException e)
-        {
-            Log?.Invoke($"Response ObjectDisposedException {e.ToLogString(Environment.StackTrace)}");
-        }
-        catch (IOException e)
-        {
-            Log?.Invoke($"Connection closed. Receive boardResponse finised. (IOException)");
+            _receiveCts?.Cancel();
+            _dispatchQueue?.Writer.TryComplete();
             _tcpClient?.Close();
-            throw;
         }
         catch (Exception e)
         {
-            Log?.Invoke($"Response Exception {e.ToLogString(Environment.StackTrace)}");
-            Close();
-            throw;
+            Log?.Invoke($"Close error: {e.Message}");
         }
-        finally
+
+        RaiseStateChange(status, cause);
+    }
+
+    private void RaiseStateChange(BoardConnectionStatus status, ConnectionCause cause)
+    {
+        var change = new ConnectionStateChange(status, cause);
+        Log?.Invoke($"{this} -> {change}");
+        try
         {
-            Log?.Invoke("Response finally");
+            OnConnectionStatusChanged?.Invoke(this, change);
         }
+        catch (Exception e)
+        {
+            Log?.Invoke($"OnConnectionStatusChanged handler error: {e.Message}");
+        }
+    }
+
+    // ---- Recepção com remontagem + fila de despacho (T-012/T-013) ----
+
+    private async Task ReceiveLoopAsync(CancellationToken ct)
+    {
+        var stream = _tcpClient!.GetStream();
+        var buffer = new byte[1024];
+        var assembler = new FrameAssembler(FrameSize);
+
+        try
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), ct).ConfigureAwait(false);
+
+                if (bytesRead == 0)
+                {
+                    // Fim de stream = encerramento remoto ordenado.
+                    CloseInternal(BoardConnectionStatus.Failed, ConnectionCause.RemoteClose);
+                    return;
+                }
+
+                foreach (var frame in assembler.Push(buffer, bytesRead))
+                {
+                    LiteNet2Response? response = null;
+                    try
+                    {
+                        response = ProcessResponse(frame);
+                    }
+                    catch (Exception e)
+                    {
+                        // Mensagem malformada: descarta, mantém a conexão viva (AC-006.2).
+                        Log?.Invoke($"Malformed message discarded: {e.Message}");
+                    }
+
+                    if (response != null)
+                        _dispatchQueue?.Writer.TryWrite(response); // despacho fora do laço (AC-006.4)
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // cancelamento por Close local — evento já publicado por CloseInternal.
+        }
+        catch (Exception e) when (e is IOException or SocketException or ObjectDisposedException)
+        {
+            // keepalive expirado / reset / socket morto sem FIN (AC-004.1).
+            Log?.Invoke($"Receive terminated: {e.Message}");
+            CloseInternal(BoardConnectionStatus.Failed, ConnectionCause.ReceiveError);
+        }
+        catch (Exception e)
+        {
+            Log?.Invoke($"Receive unexpected error: {e.ToLogString(Environment.StackTrace)}");
+            CloseInternal(BoardConnectionStatus.Failed, ConnectionCause.ReceiveError);
+        }
+    }
+
+    private void StartDispatch(CancellationToken ct)
+    {
+        _dispatchQueue = Channel.CreateUnbounded<LiteNet2Response>(new UnboundedChannelOptions
+        {
+            SingleReader = true,
+            SingleWriter = true
+        });
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var response in _dispatchQueue.Reader.ReadAllAsync(ct).ConfigureAwait(false))
+                {
+                    try
+                    {
+                        OnResponse?.Invoke(response);
+                    }
+                    catch (Exception e)
+                    {
+                        // Handler lento/com erro não derruba a recepção (AC-006.3).
+                        Log?.Invoke($"OnResponse handler error: {e.Message}");
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }, ct);
     }
 
     private LiteNet2Response ProcessResponse(byte[] resp)
@@ -186,111 +309,49 @@ public class LiteNet2BoardBase
         return identification!;
     }
 
-    public void Send(LiteNet2Commands liteNet2Command, int parameter)
-    {
-        Send(liteNet2Command, BitConverter.GetBytes(parameter));
-    }
+    // ---- Envio serializado com resultado honesto (T-014) ----
 
-    public void Send(LiteNet2Commands liteNet2Command, byte parameter)
-    {
-        Send(liteNet2Command, new[] { parameter });
-    }
+    public SendResult Send(LiteNet2Commands liteNet2Command, int parameter)
+        => Send(liteNet2Command, BitConverter.GetBytes(parameter));
 
-    public void Send(LiteNet2Commands liteNet2Command, string parameter)
+    public SendResult Send(LiteNet2Commands liteNet2Command, byte parameter)
+        => Send(liteNet2Command, new[] { parameter });
+
+    public SendResult Send(LiteNet2Commands liteNet2Command, string parameter)
     {
         parameter = parameter.Truncate(16).PadRight(16, '\0');
-
-        Send(liteNet2Command, Encoding.ASCII.GetBytes(parameter));
+        return Send(liteNet2Command, Encoding.ASCII.GetBytes(parameter));
     }
 
-    public void Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null)
-    {
-        var send = new LiteNet2Send(liteNet2Command, parameter);
+    public SendResult Send(LiteNet2Commands liteNet2Command, byte[]? parameter = null)
+        => Send(new LiteNet2Send(liteNet2Command, parameter));
 
-        Send(send);
-    }
+    public SendResult Send(ushort comando, byte[]? parameter = null)
+        => Send(new LiteNet2Send(comando, parameter));
 
-    public void Send(ushort comando, byte[]? parameter = null)
-    {
-        var send = new LiteNet2Send(comando, parameter);
-
-        Send(send);
-    }
-
-    public void Send(LiteNet2Send liteNet2Send)
+    public SendResult Send(LiteNet2Send liteNet2Send)
     {
         OnSend?.Invoke(this, liteNet2Send);
 
         if (!Connected)
-        {
-            TryReconnect();
-            return;
-        }
+            return SendResult.Fail(SendResult.SendError.Disconnected, $"{this} disconnected"); // AC-005.1
 
-        var stream = _tcpClient!.GetStream();
-
+        _sendLock.Wait();
         try
         {
+            var stream = _tcpClient!.GetStream();
             stream.Write(liteNet2Send.Payload, 0, liteNet2Send.Payload.Length);
+            return SendResult.Ok();
         }
-        catch (SocketException sex)
+        catch (Exception e) when (e is IOException or SocketException or ObjectDisposedException)
         {
-            _tcpClient?.Close();
-            throw;
+            CloseInternal(BoardConnectionStatus.Failed, ConnectionCause.SendError);
+            return SendResult.Fail(SendResult.SendError.WriteFailure, e.Message);
         }
-        catch (IOException iox)
+        finally
         {
-            _tcpClient?.Close();
-            throw;
+            _sendLock.Release();
         }
-        catch (Exception e)
-        {
-            _tcpClient?.Close();
-            throw;
-        }
-    }
-
-    private int _reconnecting;
-
-    public void TryReconnect()
-    {
-        Task.Run(async () =>
-        {
-            if (Interlocked.Exchange(ref _reconnecting, 1) == 1) return;
-
-            try
-            {
-                var delayMs = 200;
-                OnStatus?.Invoke(this, "Reconnecting");
-
-                while (!Connected)
-                {
-                    try
-                    {
-                        Connect();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log?.Invoke($"Reconnect failed: {ex.Message}");
-                    }
-
-                    if (Connected) continue;
-                    
-                    var networkName = NetworkInterfaceUtils.GetDefaultNetworkInterface()?.Name;
-                    var board = LiteNetUtil.Search(networkName, SerialNumber);
-                        
-                    Ip = board?.Ip ?? Ip;
-                        
-                    await Task.Delay(delayMs).ConfigureAwait(false);
-                    if (delayMs < 5000)
-                        delayMs = Math.Min(delayMs * 2, 5000);
-                }
-            }
-            finally
-            {
-                Interlocked.Exchange(ref _reconnecting, 0);
-            }
-        });
     }
 
     protected void EventStatus(string status) => OnStatus?.Invoke(this, status);
@@ -300,20 +361,23 @@ public class LiteNet2BoardBase
         try
         {
             using var tcpClient = new TcpClient();
-            await tcpClient.ConnectAsync(Ip, Port).ConfigureAwait(false);
+            // Teto curto cobrindo conexão E leitura (AC-003.4): equipamento que atende e cala
+            // não pode prender a varredura (~21s presos por tentativa era o defeito).
+            using var timeoutCts = new CancellationTokenSource(ConnectTimeout);
+            await tcpClient.ConnectAsync(Ip, ConnectPort, timeoutCts.Token).ConfigureAwait(false);
 
             var stream = tcpClient.GetStream();
             var request = new LiteNet2Send(LiteNet2Commands.GetSerialNumber);
 
-            await stream.WriteAsync(request.Payload, 0, request.Payload.Length).ConfigureAwait(false);
+            await stream.WriteAsync(request.Payload.AsMemory(), timeoutCts.Token).ConfigureAwait(false);
 
-            var buffer = new byte[20];
+            var buffer = new byte[FrameSize];
             var bytesRead = 0;
 
             while (bytesRead < buffer.Length)
             {
-                var read = await stream.ReadAsync(buffer, bytesRead, buffer.Length - bytesRead)
-                    .ConfigureAwait(false);
+                var read = await stream.ReadAsync(buffer.AsMemory(bytesRead, buffer.Length - bytesRead),
+                    timeoutCts.Token).ConfigureAwait(false);
 
                 if (read == 0)
                     break;
