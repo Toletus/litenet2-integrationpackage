@@ -6,9 +6,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Toletus.LiteNet2.Base.Utils;
 using Toletus.LiteNet2.Command;
 using Toletus.LiteNet2.Command.Enums;
 using Toletus.Pack.Core.Extensions;
+using Toletus.Pack.Core.Network.Utils;
 
 namespace Toletus.LiteNet2.Base;
 
@@ -24,13 +26,9 @@ public class LiteNet2BoardBase
     /// <summary>Tamanho fixo do frame LiteNet2 (prefixo+comando+dados+sufixo).</summary>
     public const int FrameSize = 20;
 
-    // Parâmetros de resiliência expostos para calibração em bancada (TDD §4.5 / risco §10).
-    // ponytail: defaults iniciais; valores finais saem do soak 24h (T-061) e entram por config no app.
+    // Tetos de socket. NÃO há keepalive TCP aqui — ver ConfigureSocket.
     public static TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
     public static TimeSpan SendTimeout { get; set; } = TimeSpan.FromSeconds(5);
-    public static TimeSpan KeepAliveTime { get; set; } = TimeSpan.FromSeconds(10);
-    public static TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(5);
-    public static int KeepAliveRetryCount { get; set; } = 3;
 
     public IPAddress Ip { get; set; }
     public IPAddress? NetworkIp { get; set; }
@@ -59,6 +57,8 @@ public class LiteNet2BoardBase
     private CancellationTokenSource? _receiveCts;
     private Channel<LiteNet2Response>? _dispatchQueue;
     private int _closing;
+    private HealthCheck? _healthCheck;
+    private int _reconnecting;
 
     public bool Connected => _tcpClient?.Client != null && _tcpClient.Connected;
 
@@ -76,8 +76,10 @@ public class LiteNet2BoardBase
     public void Connect() => ConnectAsync(CancellationToken.None).GetAwaiter().GetResult();
 
     /// <summary>
-    /// Conexão assíncrona com teto próprio, keepalive de transporte e teto de envio (T-010/AC-004.1).
-    /// Não inicia recuperação autônoma — o consumidor é o único dono da reconexão (ADR-001).
+    /// Conexão assíncrona com teto próprio e teto de envio. A liveness é de aplicação
+    /// (HealthCheck: poll GetId a cada 10s + TryReconnect) — mecanismo comprovado em produção.
+    /// ADR-001 (transporte não se auto-recupera) foi REVERTIDO: o keepalive TCP que o substituiu
+    /// derrubava a conexão ociosa em ~25s porque este firmware não responde às sondas.
     /// </summary>
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
@@ -109,28 +111,17 @@ public class LiteNet2BoardBase
         StartDispatch(_receiveCts.Token);
         _ = ReceiveLoopAsync(_receiveCts.Token);
 
+        _healthCheck ??= new HealthCheck(this);
+
         RaiseStateChange(BoardConnectionStatus.Connected, ConnectionCause.None);
     }
 
+    // Sem keepalive TCP: as sondas (pacote sem dados, respondidas pela pilha do peer) nao sao
+    // respondidas por este firmware, e derrubavam a conexao ociosa em ~25s. A liveness e feita
+    // na camada de aplicacao pelo HealthCheck (poll GetId 10s) - mecanismo comprovado em producao.
     private static void ConfigureSocket(Socket socket)
     {
         socket.SendTimeout = (int)SendTimeout.TotalMilliseconds;
-
-        try
-        {
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime,
-                (int)KeepAliveTime.TotalSeconds);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval,
-                (int)KeepAliveInterval.TotalSeconds);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount,
-                KeepAliveRetryCount);
-        }
-        catch (Exception e)
-        {
-            // ponytail: keepalive fino é best-effort por plataforma; SO_KEEPALIVE base já ativado acima quando suportado.
-            Log?.Invoke($"KeepAlive tuning unavailable: {e.Message}");
-        }
     }
 
     public void CheckConnection()
@@ -155,6 +146,12 @@ public class LiteNet2BoardBase
         catch (Exception e)
         {
             Log?.Invoke($"Close error: {e.Message}");
+        }
+
+        if (cause == ConnectionCause.LocalClose)
+        {
+            _healthCheck?.Dispose();
+            _healthCheck = null;
         }
 
         RaiseStateChange(status, cause);
@@ -352,6 +349,51 @@ public class LiteNet2BoardBase
         {
             _sendLock.Release();
         }
+    }
+
+    /// <summary>
+    /// Reconexao autonoma do transporte, acionada pelo HealthCheck. Restaurada: e o mecanismo
+    /// que mantem a frota estavel em producao (o legado depende 100% dela).
+    /// </summary>
+    public void TryReconnect()
+    {
+        Task.Run(async () =>
+        {
+            if (Interlocked.Exchange(ref _reconnecting, 1) == 1) return;
+
+            try
+            {
+                var delayMs = 200;
+                OnStatus?.Invoke(this, "Reconnecting");
+
+                while (!Connected)
+                {
+                    try
+                    {
+                        Connect();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log?.Invoke($"Reconnect failed: {ex.Message}");
+                    }
+
+                    if (Connected) continue;
+
+                    var networkName = NetworkInterfaceUtils.GetDefaultNetworkInterface()?.Name;
+                    var board = LiteNetUtil.Search(networkName, SerialNumber);
+
+                    Ip = board?.Ip ?? Ip;
+
+                    await Task.Delay(delayMs).ConfigureAwait(false);
+                    if (delayMs < 5000)
+                        delayMs = Math.Min(delayMs * 2, 5000);
+                }
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _reconnecting, 0);
+            }
+        });
     }
 
     protected void EventStatus(string status) => OnStatus?.Invoke(this, status);
