@@ -173,9 +173,11 @@ public class TransportTests
         Assert.True(board.Connected);
     }
 
-    // T-015 / ADR-001 — queda não dispara reconexão autônoma do transporte.
+    // ADR-001 REVERTIDO: o transporte VOLTA a se recuperar sozinho via HealthCheck
+    // (poll GetId 10s + TryReconnect) — mecanismo comprovado em produção. O HealthCheck
+    // só age a partir de dueTime=30s, então logo após a queda ainda não há reconexão.
     [Fact]
-    public void Drop_does_not_trigger_autonomous_reconnect()
+    public void Drop_raises_failure_and_recovery_is_owned_by_healthcheck()
     {
         using var server = new FakeBoardServer();
         var board = Connect(server);
@@ -183,8 +185,8 @@ public class TransportTests
 
         server.CloseWithReset();
         WaitUntil(() => !board.Connected, Timeout);
-        Thread.Sleep(500); // dá tempo de um eventual laço de reconexão agir
 
-        Assert.Equal(1, server.ConnectionCount); // nenhuma nova conexão partiu do pacote
+        Assert.False(board.Connected);
+        Assert.Equal(1, server.ConnectionCount); // HealthCheck ainda não entrou (dueTime 30s)
     }
 }
